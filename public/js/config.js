@@ -1,17 +1,7 @@
 // Frontend Configuration
 const config = {
-    // API Base URL - automatically detects environment
-    apiBaseUrl: (() => {
-        const { hostname, port, protocol } = window.location;
-        
-        // Local development
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            return `${protocol}//${hostname}:${port || 3005}/api`;
-        }
-        
-        // Production - same origin (server serves both API and static)
-        return '/api';
-    })(),
+    // API Base URL - always relative to current origin
+    apiBaseUrl: '/api',
 
     // Default location (fallback if geolocation fails)
     defaultLocation: {

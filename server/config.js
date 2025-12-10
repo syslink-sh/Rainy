@@ -18,8 +18,7 @@ module.exports = {
                 'http://localhost:5150',
                 'http://127.0.0.1:3005',
                 'http://127.0.0.1:5150',
-                'https://rainy.syslink.dev',
-                'https://rainy-api.syslink.dev',
+                'https://rainy.syslink.dev'
             ],
     },
 

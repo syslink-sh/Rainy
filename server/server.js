@@ -49,6 +49,16 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+/// VERCEL CAUSE IM BROKE START
+
+// Only listen when running directly (not on Vercel)
+if (process.env.VERCEL !== '1') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+}
+
+// Export for Vercel serverless
+module.exports = app;
+
+/// VERCEL CAUSE IM BROKE END

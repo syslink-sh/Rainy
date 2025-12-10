@@ -10,12 +10,14 @@ Rainy is a beautiful, fast, and immersive weather application that provides real
 
 ## Installation
 
+### API Server
+
 1. Clone the repository.
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Start the server:
+3. Start the API server:
    ```bash
    npm start
    ```
@@ -23,7 +25,15 @@ Rainy is a beautiful, fast, and immersive weather application that provides real
    ```bash
    npm run dev
    ```
-4. Website will be on `http://localhost:3005`. ( For production website will be on `http://localhost:5150`)
+4. API will be available at `http://localhost:3005` (dev) or `http://localhost:5150` (production).
+
+### Frontend
+
+The `public/` folder contains the static frontend and must be hosted separately. You can use any static file hosting solution:
+- **Local development**: Use a tool like `npx serve public` or VS Code Live Server
+- **Production**: Deploy to Cloudflare Pages, Netlify, GitHub Pages, or serve via Nginx/Apache
+
+> **Note:** The server only runs the API. It does not serve the frontend website.
 
 ## Configuration
 

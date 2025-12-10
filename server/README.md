@@ -1,6 +1,6 @@
 # Rainy -- Server
 
-This directory contains the backend code for the Rainy websites.
+This directory contains the **API-only** backend for Rainy. The server does not serve the frontend website - the `public/` folder must be hosted separately (e.g., via Nginx, Apache, Cloudflare Pages, or any static file host).
 
 ## Structure
 

@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -40,25 +39,17 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, '../public')));
-
+// API routes only - frontend is served separately
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', message: 'Rainy API Server' });
 });
 
-/// VERCEL CAUSE IM BROKE START
+app.listen(PORT, () => {
+    console.log(`API Server is running on http://localhost:${PORT}`);
+});
 
-// Only listen when running directly (not on Vercel)
-if (process.env.VERCEL !== '1') {
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-    });
-}
-
-// Export for Vercel serverless
 module.exports = app;
-
-/// VERCEL CAUSE IM BROKE END

@@ -753,40 +753,43 @@ main {
 }
 
 .app-footer {
-    text-align: center;
-    padding: 1.5rem 0 0.5rem;
-    color: white;
-    font-size: 0.9rem;
-    opacity: 0.8;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
-}
+        text-align: center;
+        padding: 1.5rem 0 0.5rem;
+        color: #334155;
+        font-size: 1rem;
+        opacity: 0.85;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
 
 .app-footer a {
-    color: white;
-    text-decoration: none;
-    font-weight: 600;
-    transition: opacity 0.2s ease;
-}
+        color: #4facfe;
+        text-decoration: none;
+        font-weight: 600;
+        transition: opacity 0.2s ease, color 0.2s;
+    }
 
 .app-footer a:hover {
-    opacity: 0.7;
-    text-decoration: underline;
-}
+        opacity: 0.7;
+        text-decoration: underline;
+        color: #1994e6;
+    }
 
 .error-toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #ef4444;
-    color: white;
-    padding: 1rem 2rem;
-    border-radius: 50px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    display: none;
-    animation: slideUp 0.3s ease;
-    z-index: 2000;
-}
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ef4444;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        display: none;
+        animation: slideUp 0.3s ease;
+        z-index: 2000;
+        font-size: 1.1rem;
+        outline: none;
+    }
 
 .global-loader {
     position: fixed;

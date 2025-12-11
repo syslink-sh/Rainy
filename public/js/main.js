@@ -27,18 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCityName = null;
 
     // Register for periodic sync and setup online/offline handlers
+    // Improves offline experience and keeps weather data fresh
     const setupServiceWorkerCommunication = async () => {
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
             // Listen for messages from service worker
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.type === 'PERIODIC_SYNC') {
-                    console.log('[App] Received periodic sync - refreshing weather data');
+                    console.log('[Rainy] Weather data refreshed automatically.');
                     if (currentLat && currentLon) {
                         fetchWeather(currentLat, currentLon, currentCityName, true);
                     }
                 }
                 if (event.data && event.data.type === 'CACHE_REFRESHED') {
-                    console.log('[App] Cache has been refreshed');
+                    console.log('[Rainy] Cache updated for offline use.');
                 }
             });
 
@@ -54,19 +55,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         await registration.periodicSync.register('weather-periodic-sync', {
                             minInterval: 60 * 60 * 1000, // 1 hour
                         });
-                        console.log('[App] Periodic sync registered');
+                        console.log('[Rainy] Periodic sync registered.');
                     }
                 } catch (error) {
-                    console.log('[App] Periodic sync registration failed:', error);
+                    console.log('[Rainy] Periodic sync registration failed:', error);
                 }
             }
         }
     };
 
     // Handle online/offline status changes
+    // Improves user feedback and cache refresh
     const setupConnectivityListeners = () => {
         window.addEventListener('online', () => {
-            console.log('[App] Back online - notifying service worker to refresh cache');
+            console.log('[Rainy] You are back online. Weather data will be refreshed.');
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'ONLINE_STATUS_CHANGED',
@@ -80,8 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         window.addEventListener('offline', () => {
-            console.log('[App] Went offline');
-            showError('You are offline. Showing cached data.');
+            console.log('[Rainy] You are offline. Cached data will be shown.');
+            showError('You are offline. Cached weather data is displayed.');
         });
     };
 
@@ -580,6 +582,10 @@ document.addEventListener('DOMContentLoaded', () => {
         searchResultsEl.style.display = 'block';
     };
 
+    /**
+     * Show a friendly error message to the user
+     * @param {string} msg - Message to display
+     */
     const showError = (msg) => {
         errorToast.textContent = msg;
         errorToast.style.display = 'block';
@@ -588,10 +594,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    // Initial Load Error Handling
+    /**
+     * Handle initial load errors gracefully
+     * @param {Error} error
+     */
     const handleInitialLoadError = (error) => {
         console.error("Initial load failed:", error);
-        showError("Could not determine location. Defaulting to London.");
+        showError("We couldn't determine your location. Showing weather for London as a default.");
         fetchWeather(51.5074, -0.1278, "London");
     };
 
@@ -603,11 +612,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Attempt to get user's location, fallback to default if not available
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
-                
                 let cityName = "Current Location";
                 let countryName = "";
                 try {
@@ -621,7 +630,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     console.error("Reverse geocoding failed", e);
                 }
-
                 countryNameEl.textContent = countryName;
                 fetchWeather(latitude, longitude, cityName);
             },

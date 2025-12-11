@@ -70,22 +70,22 @@
         <header>
             <div class="header-left">
                 <a href="/" class="logo-link">
-                    <span class="logo-icon">🌦️</span>
-                    <span class="logo-text">Rainy</span>
+                        <span class="logo-icon" aria-hidden="true">🌦️</span>
+                        <span class="logo-text">Rainy</span>
                 </a>
                 <div class="search-container">
                     <div class="search-bar">
-                        <input type="text" id="search-input" placeholder="Search city..." autocomplete="off">
-                        <button id="search-btn"><i class="fas fa-search"></i></button>
+                            <input type="text" id="search-input" placeholder="Search for a city" autocomplete="off" aria-label="Search for a city">
+                            <button id="search-btn" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></button>
                     </div>
                     <div id="search-results" class="search-results"></div>
                 </div>
             </div>
             <div class="location-display">
-                <h2 id="city-name">Loading...</h2>
-                <p id="country-name"></p>
-                <p id="current-time">--:--</p>
-                <p id="date-display">--</p>
+                    <h2 id="city-name" aria-live="polite">Loading city...</h2>
+                    <p id="country-name" aria-live="polite"></p>
+                    <p id="current-time" aria-live="polite">--:--</p>
+                    <p id="date-display" aria-live="polite">--</p>
             </div>
         </header>
         
@@ -145,26 +145,26 @@
             </div>
 
             <div class="radar-container">
-                <h3>Weather Radar</h3>
+                    <h3 id="weather-radar-title">Weather Radar</h3>
                 <div class="map-wrapper">
                     <div id="radar-map"></div>
                     <div id="map-loader" class="map-loader">
                         <div class="spinner"></div>
-                        <p>Loading Radar...</p>
+                            <p aria-live="polite">Loading radar data...</p>
                     </div>
                 </div>
             </div>
 
             <div class="forecast-container">
                 <div class="hourly-forecast">
-                    <h3>Hourly Forecast</h3>
+                        <h3 id="hourly-forecast-title">Hourly Forecast</h3>
                     <div class="hourly-scroll" id="hourly-forecast">
                         <!-- Hourly items injected here -->
                     </div>
                 </div>
                 
                 <div class="daily-forecast">
-                    <h3>7-Day Forecast</h3>
+                        <h3 id="daily-forecast-title">7-Day Forecast</h3>
                     <div class="daily-list" id="daily-forecast">
                         <!-- Daily items injected here -->
                     </div>
@@ -175,7 +175,7 @@
         <div class="error-toast" id="error-toast"></div>
 
         <footer class="app-footer">
-            <p>Made By <a href="https://github.com/syslink-sh" target="_blank" rel="noopener noreferrer">SySLink</a></p>
+                <p>Made with ❤️ by <a href="https://github.com/syslink-sh" target="_blank" rel="noopener noreferrer">SySLink</a></p>
         </footer>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>

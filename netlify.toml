@@ -1,20 +1,15 @@
 [build]
-  # Directory to publish (static files)
   publish = "public"
-  # Build command (if needed)
   command = "echo 'No build step required'"
-  # Functions directory for serverless functions
   functions = "netlify/functions"
 
 [dev]
-  # Local development settings
   command = "npm run dev"
   port = 3005
   targetPort = 3005
   publish = "public"
   autoLaunch = true
 
-# Redirect API calls to serverless functions
 [[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/api/health"
@@ -35,13 +30,11 @@
   to = "/.netlify/functions/api/reverse-geocode"
   status = 200
 
-# SPA fallback - serve index.html for all routes
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Headers for security and caching
 [[headers]]
   for = "/*"
   [headers.values]

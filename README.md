@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/syslink-sh/rainy">
-    <img src="public/icons/icon-192x192.png" alt="Logo" width="80" height="80">
+    <img src="ghimages/icon.svg" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Rainy 🌦️</h3>

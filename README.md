@@ -1,76 +1,132 @@
-# Rainy 🌦️
+<a id="readme-top"></a>
+<br />
+<div align="center">
+  <a href="https://github.com/syslink-sh/rainy">
+    <img src="public/icons/icon-192x192.png" alt="Logo" width="80" height="80">
+  </a>
 
-A beautiful, fast, and immersive weather application that provides real-time forecasts for any city in the world.
+<h3 align="center">Rainy 🌦️</h3>
 
-![License](https://img.shields.io/badge/license-ISC-blue.svg)
-![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
+  <p align="center">
+    A beautiful, fast, and immersive weather application that provides real-time forecasts for any city in the world.
+    <br />
+    <a href="https://github.com/syslink-sh/rainy"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://rainy.syslink.dev">View Demo</a>
+    &middot;
+    <a href="https://github.com/syslink-sh/rainy/issues/new?labels=bug">Report Bug</a>
+    &middot;
+    <a href="https://github.com/syslink-sh/rainy/issues/new?labels=enhancement">Request Feature</a>
+  </p>
+</div>
 
-## ✨ Features
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#pwa-installation">PWA Installation</a></li>
+    <li><a href="#api-endpoints">API Endpoints</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-- **Real-time Weather** — Current temperature, conditions, wind, humidity, pressure, and visibility
-- **Live Radar** — Interactive precipitation and cloud cover radar map powered by RainViewer
-- **Forecasts** — 24-hour hourly forecast and 7-day daily forecast
-- **Dynamic Backgrounds** — Beautiful animated backgrounds that change based on weather and time of day
-- **City Search** — Search any city worldwide with autocomplete
-- **Geolocation** — Automatically detects your location on load
-- **Responsive** — Works on desktop, tablet, and mobile
+## About The Project
 
-## 🚀 Quick Start
+[![Rainy Weather App][product-screenshot]](https://rainy.syslink.dev)
+
+Rainy is a modern weather application featuring:
+
+* **Real-time Weather** — Current temperature, conditions, wind, humidity, pressure, and visibility
+* **Live Radar** — Interactive precipitation and cloud cover radar map powered by RainViewer
+* **Forecasts** — 24-hour hourly forecast and 7-day daily forecast
+* **Dynamic Backgrounds** — Beautiful animated backgrounds that change based on weather and time of day
+* **City Search** — Search any city worldwide with autocomplete
+* **Geolocation** — Automatically detects your location on load
+* **PWA Support** — Install as an app on phones and computers with offline support
+* **Mobile Optimized** — Touch-friendly UI with safe area support for notched devices
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Built With
+
+* [![Node.js][Node.js]][Node-url]
+* [![Express][Express.js]][Express-url]
+* [![JavaScript][JavaScript]][JavaScript-url]
+* [![CSS3][CSS3]][CSS3-url]
+* [![Leaflet][Leaflet]][Leaflet-url]
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Getting Started
+
+To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
+* Node.js 18+
+* npm
+  ```sh
+  npm install npm@latest -g
+  ```
 
 ### Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/syslink-sh/rainy.git
-cd rainy
+1. Clone the repo
+   ```sh
+   git clone https://github.com/syslink-sh/rainy.git
+   ```
+2. Navigate to the project directory
+   ```sh
+   cd rainy
+   ```
+3. Install NPM packages
+   ```sh
+   npm install
+   ```
+4. Start the server
+   ```sh
+   npm start
+   ```
+5. Open your browser and visit `http://localhost:3005`
 
-# Install dependencies
-npm install
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# Start the server
-npm start
-```
-
-The app will be available at `http://localhost:3005`
+## Usage
 
 ### Development Mode
 
-```bash
+Run with auto-reload on file changes:
+```sh
 npm run dev
 ```
 
-Uses nodemon for auto-reload on file changes.
+### Production Mode
 
-## 📁 Project Structure
-
-```
-rainy/
-├── public/                 # Frontend static files
-│   ├── index.html          # Main HTML file
-│   ├── css/
-│   │   └── style.css       # Styles with dynamic weather themes
-│   └── js/
-│       ├── config.js       # Frontend configuration
-│       └── main.js         # Main application logic
-├── server/                 # Backend API server
-│   ├── server.js           # Express server entry point
-│   ├── config.js           # Server configuration
-│   ├── routes/
-│   │   └── api.js          # API route definitions
-│   └── controllers/
-│       └── apiController.js # API logic & external API calls
-├── package.json
-└── README.md
+```sh
+NODE_ENV=production npm start
 ```
 
-## 🔧 Configuration
+### Configuration
 
-### Environment Variables
+Environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -78,25 +134,23 @@ rainy/
 | `NODE_ENV` | Environment | `development` |
 | `ALLOWED_ORIGINS` | CORS origins (comma-separated) | localhost, rainy.syslink.dev |
 
-### Server Config (`server/config.js`)
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-```javascript
-module.exports = {
-    server: {
-        port: 3005,
-        env: 'development',
-    },
-    cors: {
-        allowedOrigins: ['http://localhost:3005', 'https://rainy.syslink.dev'],
-    },
-};
-```
+## PWA Installation
 
-### Frontend Config (`public/js/config.js`)
+### On Mobile (iOS/Android)
+1. Open [rainy.syslink.dev](https://rainy.syslink.dev) in your browser
+2. **iOS**: Tap the Share button → "Add to Home Screen"
+3. **Android**: Tap the menu → "Add to Home Screen" or "Install app"
 
-The frontend auto-detects the API URL based on the current hostname.
+### On Desktop (Chrome/Edge)
+1. Open [rainy.syslink.dev](https://rainy.syslink.dev)
+2. Click the install icon in the address bar, or
+3. Menu → "Install Rainy..."
 
-## 🌐 API Endpoints
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## API Endpoints
 
 | Endpoint | Description |
 |----------|-------------|
@@ -105,47 +159,86 @@ The frontend auto-detects the API URL based on the current hostname.
 | `GET /api/search?q=` | Search cities by name |
 | `GET /api/reverse-geocode?lat=&lon=` | Get city name from coordinates |
 
-## 🚢 Deployment
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Render
+## Roadmap
 
-1. Connect your GitHub repository
-2. Set **Build Command**: `npm install`
-3. Set **Start Command**: `npm start`
-4. Add environment variable: `NODE_ENV=production`
+- [x] Real-time weather data
+- [x] Interactive radar map
+- [x] Hourly and daily forecasts
+- [x] PWA support with offline capabilities
+- [x] Mobile responsive design
+- [ ] Weather alerts and notifications
+- [ ] Multiple saved locations
+- [ ] Weather widgets
 
-### Docker
+See the [open issues](https://github.com/syslink-sh/rainy/issues) for a full list of proposed features (and known issues).
 
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 5150
-ENV NODE_ENV=production
-CMD ["npm", "start"]
-```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Manual
+## Contributing
 
-```bash
-NODE_ENV=production npm start
-```
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-## 🛠️ Tech Stack
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
 
-- **Backend**: Node.js, Express
-- **Frontend**: Vanilla JavaScript, CSS3
-- **APIs**: Open-Meteo (weather), RainViewer (radar), Nominatim (geocoding)
-- **Map**: Leaflet.js
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 License
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-ISC © [SySLink](https://github.com/syslink-sh)
+### Top contributors:
 
-## 🔗 Links
+<a href="https://github.com/syslink-sh/rainy/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=syslink-sh/rainy" alt="contrib.rocks image" />
+</a>
 
-- [Live Demo](https://rainy.syslink.dev)
-- [GitHub](https://github.com/syslink-sh/rainy)
-- [Report Issues](https://github.com/syslink-sh/rainy/issues)
+## License
+
+Distributed under the ISC License. See `LICENSE` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Contact
+
+SySLink - [@syslink_sh](https://twitter.com/syslink_sh)
+
+Project Link: [https://github.com/syslink-sh/rainy](https://github.com/syslink-sh/rainy)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Acknowledgments
+
+* [Open-Meteo](https://open-meteo.com/) - Free Weather API
+* [RainViewer](https://www.rainviewer.com/) - Weather Radar API
+* [Nominatim](https://nominatim.org/) - Geocoding Service
+* [Leaflet](https://leafletjs.com/) - Interactive Maps
+* [Font Awesome](https://fontawesome.com/) - Icons
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+[contributors-shield]: https://img.shields.io/github/contributors/syslink-sh/rainy.svg?style=for-the-badge
+[contributors-url]: https://github.com/syslink-sh/rainy/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/syslink-sh/rainy.svg?style=for-the-badge
+[forks-url]: https://github.com/syslink-sh/rainy/network/members
+[stars-shield]: https://img.shields.io/github/stars/syslink-sh/rainy.svg?style=for-the-badge
+[stars-url]: https://github.com/syslink-sh/rainy/stargazers
+[issues-shield]: https://img.shields.io/github/issues/syslink-sh/rainy.svg?style=for-the-badge
+[issues-url]: https://github.com/syslink-sh/rainy/issues
+[license-shield]: https://img.shields.io/github/license/syslink-sh/rainy.svg?style=for-the-badge
+[license-url]: https://github.com/syslink-sh/rainy/blob/main/LICENSE
+[product-screenshot]: https://rainy.syslink.dev/og-image.png
+[Node.js]: https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white
+[Node-url]: https://nodejs.org/
+[Express.js]: https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white
+[Express-url]: https://expressjs.com/
+[JavaScript]: https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
+[JavaScript-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+[CSS3]: https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white
+[CSS3-url]: https://developer.mozilla.org/en-US/docs/Web/CSS
+[Leaflet]: https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white
+[Leaflet-url]: https://leafletjs.com/

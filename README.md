@@ -282,7 +282,7 @@ Project Link: [https://github.com/syslink-sh/rainy](https://github.com/syslink-s
 * [Font Awesome](https://fontawesome.com/) - Icons
 
 ## Notes
-There is Netlify Configuration, If you would like to host on netlify you can else just delete the configuration.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

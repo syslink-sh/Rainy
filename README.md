@@ -126,13 +126,21 @@ NODE_ENV=production npm start
 
 ### Configuration
 
-Environment variables:
+Configuration is handled via `server/config.js` and `public/js/config.js`:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | `3005` (dev) / `5150` (prod) |
-| `NODE_ENV` | Environment | `development` |
-| `ALLOWED_ORIGINS` | CORS origins (comma-separated) | localhost, rainy.syslink.dev |
+**Server Config** (`server/config.js`):
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `server.port` | Server port | `3005` (dev) / `5150` (prod) |
+| `server.env` | Environment | `development` |
+| `cors.allowedOrigins` | CORS origins | localhost, rainy.syslink.dev |
+
+**Frontend Config** (`public/js/config.js`):
+| Setting | Description |
+|---------|-------------|
+| `apiBaseUrl` | API endpoint (auto-detected) |
+| `defaultLocation` | Fallback location if geolocation fails |
+| `map` | Map zoom and tile settings |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -231,7 +239,7 @@ Project Link: [https://github.com/syslink-sh/rainy](https://github.com/syslink-s
 [issues-url]: https://github.com/syslink-sh/rainy/issues
 [license-shield]: https://img.shields.io/github/license/syslink-sh/rainy.svg?style=for-the-badge
 [license-url]: https://github.com/syslink-sh/rainy/blob/main/LICENSE
-[product-screenshot]: https://rainy.syslink.dev/og-image.png
+[product-screenshot]: ghimages/websitescreenshot.png
 [Node.js]: https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white
 [Node-url]: https://nodejs.org/
 [Express.js]: https://img.shields.io/badge/Express.js-404D59?style=for-the-badge&logo=express&logoColor=white

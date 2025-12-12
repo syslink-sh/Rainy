@@ -1,118 +1,52 @@
 {
-  "calendar_en": {
-    "seasons": [
-      {
-        "name": "Spring",
-        "start": "03-20",
-        "end": "06-20",
-        "houses": ["Ash-Shartan", "Al-Butain", "Ath-Thurayya", "Ad-Dabaran", "Al-Haqa", "Al-Hana'a"]
-      },
-      {
-        "name": "Summer",
-        "start": "06-21",
-        "end": "09-22",
-        "houses": ["Adh-Dhira", "An-Nathra", "At-Tarf", "Al-Jabha", "Az-Zubra", "As-Sarfah"]
-      },
-      {
-        "name": "Autumn",
-        "start": "09-23",
-        "end": "12-06",
-        "houses": ["Al-Awwa", "As-Simak", "Al-Ghafr", "Az-Zubana", "Al-Iklil", "Al-Qalb", "Ash-Shawla"]
-      },
-      {
-        "name": "Winter",
-        "start": "12-07",
-        "end": "03-19",
-        "houses": ["An-Naayim", "Al-Baldah", "Saad Adh-Dhabih", "Saad Bulaa", "Saad As-Suud", "Saad Al-Akhbiya", "Al-Muqaddam", "Al-Muakhkhar", "Ar-Risha"]
-      }
-    ],
-    "lunar_houses_cycle": [
-      { "name": "Ash-Shartan", "start": "01-01", "end": "01-13" },
-      { "name": "Al-Butain", "start": "01-14", "end": "01-26" },
-      { "name": "Ath-Thurayya", "start": "01-27", "end": "02-08" },
-      { "name": "Ad-Dabaran", "start": "02-09", "end": "02-21" },
-      { "name": "Al-Haqa", "start": "02-22", "end": "03-05" },
-      { "name": "Al-Hana'a", "start": "03-06", "end": "03-19" },
-      { "name": "Adh-Dhira", "start": "03-20", "end": "04-01" },
-      { "name": "An-Nathra", "start": "04-02", "end": "04-14" },
-      { "name": "At-Tarf", "start": "04-15", "end": "04-27" },
-      { "name": "Al-Jabha", "start": "04-28", "end": "05-10" },
-      { "name": "Az-Zubra", "start": "05-11", "end": "05-23" },
-      { "name": "As-Sarfah", "start": "05-24", "end": "06-05" },
-      { "name": "Al-Awwa", "start": "06-06", "end": "06-18" },
-      { "name": "As-Simak", "start": "06-19", "end": "07-01" },
-      { "name": "Al-Ghafr", "start": "07-02", "end": "07-14" },
-      { "name": "Az-Zubana", "start": "07-15", "end": "07-27" },
-      { "name": "Al-Iklil", "start": "07-28", "end": "08-09" },
-      { "name": "Al-Qalb", "start": "08-10", "end": "08-22" },
-      { "name": "Ash-Shawla", "start": "08-23", "end": "09-04" },
-      { "name": "An-Naayim", "start": "09-05", "end": "09-17" },
-      { "name": "Al-Baldah", "start": "09-18", "end": "09-30" },
-      { "name": "Saad Adh-Dhabih", "start": "10-01", "end": "10-13" },
-      { "name": "Saad Bulaa", "start": "10-14", "end": "10-26" },
-      { "name": "Saad As-Suud", "start": "10-27", "end": "11-08" },
-      { "name": "Saad Al-Akhbiya", "start": "11-09", "end": "11-21" },
-      { "name": "Al-Muqaddam", "start": "11-22", "end": "12-04" },
-      { "name": "Al-Muakhkhar", "start": "12-05", "end": "12-17" },
-      { "name": "Ar-Risha", "start": "12-18", "end": "12-31" }
-    ]
+  "seasons": {
+    "spring": "March 21 - June 20",
+    "summer": "June 21 - September 20",
+    "autumn": "September 21 - December 20",
+    "winter": "December 21 - March 20"
   },
-  "calendar_ar": {
-    "seasons": [
-      {
-        "name": "الربيع",
-        "start": "03-20",
-        "end": "06-20",
-        "houses": ["الشرطان", "البطين", "الثريا", "الدبران", "الهقعة", "الهنعة"]
-      },
-      {
-        "name": "الصيف",
-        "start": "06-21",
-        "end": "09-22",
-        "houses": ["الذراع", "النثرة", "الطرف", "الجبهة", "الزبرة", "الصرفة"]
-      },
-      {
-        "name": "الخريف",
-        "start": "09-23",
-        "end": "12-06",
-        "houses": ["العواء", "السماك", "الغفر", "الزبانا", "الإكليل", "القلب", "الشولة"]
-      },
-      {
-        "name": "الشتاء",
-        "start": "12-07",
-        "end": "03-19",
-        "houses": ["النعائم", "البلدة", "سعد الذابح", "سعد بلع", "سعد السعود", "سعد الأخبية", "المقدم", "المؤخر", "الرشا"]
-      }
-    ],
-    "lunar_houses_cycle": [
-      { "name": "الشرطان", "start": "01-01", "end": "01-13" },
-      { "name": "البطين", "start": "01-14", "end": "01-26" },
-      { "name": "الثريا", "start": "01-27", "end": "02-08" },
-      { "name": "الدبران", "start": "02-09", "end": "02-21" },
-      { "name": "الهقعة", "start": "02-22", "end": "03-05" },
-      { "name": "الهنعة", "start": "03-06", "end": "03-19" },
-      { "name": "الذراع", "start": "03-20", "end": "04-01" },
-      { "name": "النثرة", "start": "04-02", "end": "04-14" },
-      { "name": "الطرف", "start": "04-15", "end": "04-27" },
-      { "name": "الجبهة", "start": "04-28", "end": "05-10" },
-      { "name": "الزبرة", "start": "05-11", "end": "05-23" },
-      { "name": "الصرفة", "start": "05-24", "end": "06-05" },
-      { "name": "العواء", "start": "06-06", "end": "06-18" },
-      { "name": "السماك", "start": "06-19", "end": "07-01" },
-      { "name": "الغفر", "start": "07-02", "end": "07-14" },
-      { "name": "الزبانا", "start": "07-15", "end": "07-27" },
-      { "name": "الإكليل", "start": "07-28", "end": "08-09" },
-      { "name": "القلب", "start": "08-10", "end": "08-22" },
-      { "name": "الشولة", "start": "08-23", "end": "09-04" },
-      { "name": "النعائم", "start": "09-05", "end": "09-17" },
-      { "name": "البلدة", "start": "09-18", "end": "09-30" },
-      { "name": "سعد الذابح", "start": "10-01", "end": "10-13" },
-      { "name": "سعد بلع", "start": "10-14", "end": "10-26" },
-      { "name": "سعد السعود", "start": "10-27", "end": "11-08" },
-      { "name": "سعد الأخبية", "start": "11-09", "end": "11-21" },
-      { "name": "المقدم", "start": "11-22", "end": "12-04" },
-      { "name": "المؤخر", "start": "12-05", "end": "12-17" },
-      { "name": "الرشا", "start": "12-18", "end": "12-31" }
-    ]
+  "season_names": {
+    "en": {
+      "spring": "Spring",
+      "summer": "Summer",
+      "autumn": "Autumn",
+      "winter": "Winter"
+    },
+    "ar": {
+      "spring": "الربيع",
+      "summer": "الصيف",
+      "autumn": "الخريف",
+      "winter": "الشتاء"
+    }
+  },
+  "weather_month": {
+    "en": {
+      "01": "Peak cold",
+      "02": "End of cold",
+      "03": "Warming begins",
+      "04": "Mild and fresh",
+      "05": "Heat begins",
+      "06": "Extreme heat",
+      "07": "Peak heat",
+      "08": "Heat eases",
+      "09": "End of summer",
+      "10": "Pleasant",
+      "11": "Mild and cool",
+      "12": "Cold begins"
+    },
+    "ar": {
+      "01": "قمة البرد",
+      "02": "نهاية البرد",
+      "03": "بداية الاحترار",
+      "04": "معتدل ومنعش",
+      "05": "بداية الحرارة",
+      "06": "حرارة شديدة",
+      "07": "ذروة الحرارة",
+      "08": "انحسار الحرارة",
+      "09": "نهاية الصيف",
+      "10": "معتدل",
+      "11": "معتدل وبارد",
+      "12": "بداية البرد"
+    }
   }
 }

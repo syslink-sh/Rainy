@@ -693,15 +693,38 @@ document.addEventListener('DOMContentLoaded', () => {
         handleInitialLoadError(new Error("Geolocation not supported"));
     }
 
-    /* Calendar: load season and lunar house from assets/calendar.json and render */
+    /* Calendar: load season and render current month's value under the season */
     const loadCalendar = async () => {
         try {
             const resp = await fetch('/assets/calendar.json');
             if (!resp.ok) return;
             const data = await resp.json();
-            const lang = document.documentElement.lang || 'en';
-            const cal = (lang.startsWith('ar') ? data.calendar_ar : data.calendar_en) || data.calendar || (lang.startsWith('ar') ? data.calendar_en : data.calendar_ar) || null;
-            if (!cal) return;
+
+            // data.seasons: { "Spring": "March 21 – June 20", ... }
+            // data.weather_month: { "January": "...", ... }
+            if (!data || !data.seasons) return;
+
+            const monthNameMap = {
+                january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
+                july: '07', august: '08', september: '09', october: '10', november: '11', december: '12'
+            };
+
+            const parseRange = (rangeStr) => {
+                // Accept formats like "March 21 – June 20" or "March 21 - June 20"
+                const parts = rangeStr.split(/–|-/).map(p => p.trim());
+                if (parts.length !== 2) return null;
+                const parseMD = (part) => {
+                    const [monthWord, dayStr] = part.split(/\s+/);
+                    if (!monthWord || !dayStr) return null;
+                    const month = monthNameMap[monthWord.toLowerCase()];
+                    const day = String(parseInt(dayStr, 10)).padStart(2, '0');
+                    return `${month}-${day}`;
+                };
+                const start = parseMD(parts[0]);
+                const end = parseMD(parts[1]);
+                if (!start || !end) return null;
+                return { start, end };
+            };
 
             const today = new Date();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -709,29 +732,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const md = `${mm}-${dd}`;
 
             const inRange = (start, end, cur) => {
-                // start/end are MM-DD strings
                 if (start <= end) {
                     return cur >= start && cur <= end;
                 }
-                // Wrapped range (e.g., 12-07 -> 03-19)
+                // Wrapped range, e.g., 12-21 -> 03-20
                 return cur >= start || cur <= end;
             };
 
-            let currentSeason = null;
-            for (const s of cal.seasons) {
-                if (inRange(s.start, s.end, md)) {
-                    currentSeason = s;
+            let currentSeasonKey = null;
+            let currentSeasonRange = null;
+            for (const [key, rangeStr] of Object.entries(data.seasons)) {
+                const parsed = parseRange(rangeStr);
+                if (!parsed) continue;
+                if (inRange(parsed.start, parsed.end, md)) {
+                    currentSeasonKey = key; // e.g., 'spring'
+                    currentSeasonRange = `${parsed.start} — ${parsed.end}`;
                     break;
-                }
-            }
-
-            let currentHouse = null;
-            if (cal.lunar_houses_cycle && Array.isArray(cal.lunar_houses_cycle)) {
-                for (const h of cal.lunar_houses_cycle) {
-                    if (inRange(h.start, h.end, md)) {
-                        currentHouse = h;
-                        break;
-                    }
                 }
             }
 
@@ -741,25 +757,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!seasonEl) return;
 
-            if (currentSeason) {
-                const name = currentSeason.name;
-                const range = `${currentSeason.start} — ${currentSeason.end}`;
-                const houseText = currentHouse ? currentHouse.name : '';
-                const houseLabel = userLang.startsWith('ar') ? 'منزلة' : 'House';
-                const houseDisplay = houseText ? `${houseLabel}: ${houseText}` : range;
+            if (currentSeasonKey) {
+                // Determine locale code for calendar names ('en' or 'ar')
+                const langCode = userLang.startsWith('ar') ? 'ar' : 'en';
 
-                seasonEl.innerHTML = `<div class="cal-season-content"><h3 class="cal-season-name">${name}</h3><p class="cal-season-sub">${houseDisplay}</p></div>`;
+                // Get display name for season from calendar data
+                const seasonName = (data.season_names && data.season_names[langCode] && data.season_names[langCode][currentSeasonKey]) || currentSeasonKey;
+
+                // Get the current month's descriptive value from weather_month using numeric month
+                const monthNum = mm; // already padded '01'..'12'
+                const monthValue = (data.weather_month && data.weather_month[langCode] && data.weather_month[langCode][monthNum]) || '';
+
+                seasonEl.innerHTML = `<div class="cal-season-content"><h3 class="cal-season-name">${seasonName}</h3><p class="cal-season-sub">${monthValue}</p></div>`;
                 seasonEl.style.display = 'flex';
+
+                if (item1) item1.textContent = currentSeasonRange || '';
+                if (item2) item2.textContent = monthValue || '';
             } else {
                 seasonEl.style.display = 'none';
+                if (item1) item1.textContent = '';
+                if (item2) item2.textContent = '';
             }
 
-            // Decorative small boxes: show range and house short
-            if (item1) item1.textContent = currentSeason ? `${currentSeason.start} → ${currentSeason.end}` : '';
-            if (item2) item2.textContent = currentHouse ? currentHouse.name : '';
-
         } catch (e) {
-            // fail silently
             console.error('Calendar load failed', e);
         }
     };

@@ -12,12 +12,16 @@ const PERIODIC_SYNC_TAG = 'weather-periodic-sync';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
+    '/index-ar.html',
     '/css/style.css',
     '/js/config.js',
+    '/js/i18n.js',
     '/js/main.js',
     '/manifest.json',
     '/icons/icon-192x192.png',
     '/icons/icon-512x512.png',
+    '/privacy.html',
+    '/privacy-ar.html',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
@@ -25,39 +29,18 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-    if (DEBUG) console.log('[Service Worker] Installing...');
-    event.waitUntil(
-        caches.open(STATIC_CACHE)
-            .then((cache) => {
-                if (DEBUG) console.log('[Service Worker] Caching static assets');
-                return cache.addAll(STATIC_ASSETS);
-            })
-            .then(() => self.skipWaiting())
-            .catch((err) => {
-                console.error('[Service Worker] Failed to cache static assets:', err);
-            })
-    );
+    if (DEBUG) console.log('[Service Worker] Installing (no-cache mode)...');
+    // Do not cache anything on install. Move to skipWaiting so new SW becomes active.
+    event.waitUntil(self.skipWaiting());
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-    if (DEBUG) console.log('[Service Worker] Activating...');
+    if (DEBUG) console.log('[Service Worker] Activating and clearing all caches (no-cache mode)...');
+    // Delete all caches to ensure no cached responses remain
     event.waitUntil(
         caches.keys()
-            .then((cacheNames) => {
-                return Promise.all(
-                    cacheNames
-                        .filter((cacheName) => {
-                            return cacheName !== STATIC_CACHE && 
-                                   cacheName !== DYNAMIC_CACHE &&
-                                   cacheName.startsWith('rainy-');
-                        })
-                        .map((cacheName) => {
-                            if (DEBUG) console.log('[Service Worker] Deleting old cache:', cacheName);
-                            return caches.delete(cacheName);
-                        })
-                );
-            })
+            .then((cacheNames) => Promise.all(cacheNames.map((cn) => caches.delete(cn))))
             .then(() => self.clients.claim())
     );
 });
@@ -65,66 +48,78 @@ self.addEventListener('activate', (event) => {
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
     const { request } = event;
-    const url = new URL(request.url);
 
-    // Skip non-GET requests
-    if (request.method !== 'GET') {
+    // Only handle GET http/https requests
+    if (request.method !== 'GET') return;
+    try {
+        const url = new URL(request.url);
+        if (!url.protocol.startsWith('http')) return;
+    } catch (e) {
         return;
     }
 
-    // Skip chrome-extension and other non-http(s) requests
-    if (!url.protocol.startsWith('http')) {
-        return;
-    }
-
-    // API requests - Network only, never cache (weather data must be fresh)
-    if (url.pathname.startsWith('/api/')) {
-        event.respondWith(networkOnlyStrategy(request));
-        return;
-    }
-
-    // External resources (CDN) - Cache first, then network
-    if (url.origin !== location.origin) {
-        event.respondWith(cacheFirstStrategy(request));
-        return;
-    }
-
-    // Static assets - Cache first, then network
-    event.respondWith(cacheFirstStrategy(request));
+    // Respond with network-only for all requests. No caching.
+    event.respondWith(networkOnlyStrategy(request));
 });
+
+// Network-first strategy (prefer fresh network response, fallback to cache)
+async function networkFirstStrategy(request) {
+    try {
+        const response = await fetch(request);
+        // Update dynamic cache with fresh response for offline use
+        if (response && response.ok) {
+            try {
+                const cache = await caches.open(DYNAMIC_CACHE);
+                cache.put(request, response.clone());
+            } catch (e) {
+                // ignore caching errors
+            }
+        }
+        return response;
+    } catch (err) {
+        // Network failed, try cache
+        const cached = await caches.match(request);
+        if (cached) return cached;
+
+        // If navigation request, fall back to the app shell
+        if (request.mode === 'navigate') {
+            const offlineResponse = await caches.match('/index.html');
+            if (offlineResponse) return offlineResponse;
+        }
+
+        // otherwise rethrow
+        throw err;
+    }
+}
 
 // Network only strategy (for API calls - weather must always be fresh)
 async function networkOnlyStrategy(request) {
     try {
         return await fetch(request);
     } catch (error) {
-        if (DEBUG) console.log('[Service Worker] Network failed for API:', request.url);
-        
-        // Return offline error for weather API
-        if (request.url.includes('/api/weather')) {
-            return new Response(
-                JSON.stringify({
-                    error: 'offline',
-                    message: 'Weather data unavailable offline. Please check your connection.'
-                }),
-                {
-                    status: 503,
-                    headers: { 'Content-Type': 'application/json' }
-                }
-            );
+        if (DEBUG) console.log('[Service Worker] Network failed for request:', request.url);
+
+        // If navigation (page load) return a minimal offline HTML page
+        if (request.mode === 'navigate') {
+            const offlineHtml = `<!doctype html><html><head><meta charset="utf-8"><title>Offline</title></head><body><h1>Offline</h1><p>The app is offline and caching is disabled. Please check your connection.</p></body></html>`;
+            return new Response(offlineHtml, {
+                status: 503,
+                headers: { 'Content-Type': 'text/html' }
+            });
         }
-        
-        // Generic offline error for other API endpoints
-        return new Response(
-            JSON.stringify({
-                error: 'offline',
-                message: 'You are offline. Please check your connection.'
-            }),
-            {
+
+        // For API or asset requests return a generic offline JSON/text response
+        if (request.headers.get('accept')?.includes('application/json') || request.url.includes('/api/')) {
+            return new Response(JSON.stringify({ error: 'offline', message: 'Resource unavailable offline.' }), {
                 status: 503,
                 headers: { 'Content-Type': 'application/json' }
-            }
-        );
+            });
+        }
+
+        return new Response('Offline: resource unavailable', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' }
+        });
     }
 }
 

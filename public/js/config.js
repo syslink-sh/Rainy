@@ -30,12 +30,13 @@ const config = {
         errorToastDuration: 3000,   // ms error toast display
         hoverPopupDelay: 600,       // ms delay for map hover popup
     },
+    // Disable verbose logging in production. Set to true for debugging.
+    debug: false,
 };
 
 // Make config available globally
 window.appConfig = config;
-
-// Debug logging in development
-if (window.location.hostname === 'localhost') {
+// Debug logging only when explicitly enabled in config
+if (config.debug) {
     console.log('🌦️ Rainy Config:', config);
 }

@@ -371,6 +371,24 @@ header {
     gap: 1.5rem;
 }
 
+/* Desktop: pin logo+search to visual left and location info to visual right
+   This uses absolute positioning for large screens so placement is the same
+   regardless of document `dir` (LTR/RTL). On small screens the header stacks. */
+@media screen and (min-width: 769px) {
+    header { position: relative; }
+    .header-left {
+        position: absolute;
+        left: 2rem;
+        top: 0.6rem;
+    }
+    .location-display {
+        position: absolute;
+        right: 2rem;
+        top: 0.6rem;
+        text-align: right;
+    }
+}
+
 .logo-link {
     display: flex;
     align-items: center;
@@ -566,6 +584,55 @@ main {
     flex-direction: column;
     gap: 2rem;
     padding: 0 1rem 2rem 1rem;
+}
+
+/* Calendar widget styles (mobile-first) */
+.calendar-widget {
+    width: 100%;
+    max-width: 800px;
+    margin-top: 1.5rem;
+    padding: 0 1rem;
+}
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+.calendar-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 0.8rem;
+    box-shadow: var(--card-shadow);
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    text-align: center;
+}
+.calendar-item.small {
+    padding: 0.6rem;
+}
+.calendar-item.wide {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    text-align: center;
+}
+.cal-season-content .cal-season-name {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.cal-season-content .cal-season-sub {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
 }
 
 .hourly-forecast, .daily-forecast {
@@ -1204,6 +1271,12 @@ main {
         padding: 1rem 0 0.5rem;
         font-size: 0.8rem;
     }
+
+    /* Calendar widget on phones: make grid and wide item layout */
+    .calendar-widget { padding: 0 0.75rem; margin-top: 1rem; }
+    .calendar-grid { gap: 0.6rem; }
+    .calendar-item { min-height: 52px; border-radius: 10px; }
+    .calendar-item.wide { grid-column: span 2; padding: 0.9rem; text-align: center; align-items: center; justify-content: center; }
 }
 
 /* Extra small phones */

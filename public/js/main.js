@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Determine locale from the page language attribute
+    const userLang = document.documentElement.lang || 'en';
+    const locale = userLang.startsWith('ar') ? 'ar-EG' : 'en-US';
+    const isArabic = userLang.startsWith('ar');
+
+    // Localized unit labels
+    const units = {
+        wind: isArabic ? 'كم/س' : 'km/h',
+        humidity: '%',
+        feelsLike: isArabic ? '°' : '°',
+        pressure: isArabic ? 'هكتوباسكال' : 'hPa',
+        visibility: isArabic ? 'كم' : 'km',
+        precipitation: isArabic ? 'مم' : 'mm'
+    };
+
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
     const searchResultsEl = document.getElementById('search-results');
@@ -33,13 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Listen for messages from service worker
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.type === 'PERIODIC_SYNC') {
-                    console.log('[Rainy] Weather data refreshed automatically.');
+                    if (window.appConfig?.debug) console.log('[Rainy] Weather data refreshed automatically.');
                     if (currentLat && currentLon) {
                         fetchWeather(currentLat, currentLon, currentCityName, true);
                     }
                 }
                 if (event.data && event.data.type === 'CACHE_REFRESHED') {
-                    console.log('[Rainy] Cache updated for offline use.');
+                    if (window.appConfig?.debug) console.log('[Rainy] Cache updated for offline use.');
                 }
             });
 
@@ -55,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         await registration.periodicSync.register('weather-periodic-sync', {
                             minInterval: 60 * 60 * 1000, // 1 hour
                         });
-                        console.log('[Rainy] Periodic sync registered.');
+                            if (window.appConfig?.debug) console.log('[Rainy] Periodic sync registered.');
                     }
                 } catch (error) {
-                    console.log('[Rainy] Periodic sync registration failed:', error);
+                    if (window.appConfig?.debug) console.log('[Rainy] Periodic sync registration failed:', error);
                 }
             }
         }
@@ -68,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Improves user feedback and cache refresh
     const setupConnectivityListeners = () => {
         window.addEventListener('online', () => {
-            console.log('[Rainy] You are back online. Weather data will be refreshed.');
+            if (window.appConfig?.debug) console.log('[Rainy] You are back online. Weather data will be refreshed.');
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'ONLINE_STATUS_CHANGED',
@@ -82,8 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         window.addEventListener('offline', () => {
-            console.log('[Rainy] You are offline. Cached data will be shown.');
-            showError('You are offline. Cached weather data is displayed.');
+            if (window.appConfig?.debug) console.log('[Rainy] You are offline. Cached data will be shown.');
+            showError(isArabic ? 'أنت غير متصل بالإنترنت. عرض بيانات مخزنة مؤقتًا.' : 'You are offline. Cached weather data is displayed.');
         });
     };
 
@@ -132,12 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         daily.time.forEach((timeStr, index) => {
             const date = new Date(timeStr);
-            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-            
+            const dayName = date.toLocaleDateString(locale, { weekday: 'long' });
+            const todayLabel = locale.startsWith('ar') ? 'اليوم' : 'Today';
+
             const div = document.createElement('div');
             div.className = 'daily-item';
             div.innerHTML = `
-                <span class="day">${index === 0 ? 'Today' : dayName}</span>
+                <span class="day">${index === 0 ? todayLabel : dayName}</span>
                 <div class="icon"><i class="fas ${getWeatherIconClass(daily.weather_code[index])}"></i></div>
                 <div class="temps">
                     <span class="max">${Math.round(daily.temperature_2m_max[index])}</span>
@@ -269,6 +285,41 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">${defs}${content}</svg>`;
     };
 
+    // Translate common English weather descriptions to Arabic when needed
+    const translateWeatherDescription = (desc) => {
+        if (!desc) return '';
+        if (!isArabic) return desc;
+        const d = desc.toLowerCase();
+        const exact = {
+            'clear sky': 'سماء صافية',
+            'few clouds': 'غيوم متفرقة',
+            'scattered clouds': 'غيوم متناثرة',
+            'broken clouds': 'غيوم متكسرة',
+            'overcast clouds': 'غائم كلياً',
+            'light rain': 'أمطار خفيفة',
+            'moderate rain': 'أمطار متوسطة',
+            'heavy intensity rain': 'أمطار غزيرة',
+            'shower rain': 'زخات مطر',
+            'light snow': 'ثلوج خفيفة',
+            'snow': 'ثلوج',
+            'thunderstorm': 'عاصفة رعدية',
+            'mist': 'ضباب',
+            'fog': 'ضباب',
+            'freezing fog': 'ضباب متجمد',
+            'drizzle': 'رذاذ'
+        };
+
+        if (exact[d]) return exact[d];
+        if (d.includes('clear')) return 'صحو';
+        if (d.includes('thunder')) return 'عاصفة رعدية';
+        if (d.includes('drizzle') || d.includes('rain')) return 'أمطار';
+        if (d.includes('snow')) return 'ثلوج';
+        if (d.includes('cloud')) return 'غيوم';
+        if (d.includes('mist') || d.includes('fog') || d.includes('smog')) return 'ضباب';
+
+        return desc;
+    };
+
     const getTimeOfDay = (timeStr) => {
         // timeStr is expected to be ISO format like "2023-12-10T19:00"
         // We parse the hour from it.
@@ -330,9 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 day: 'numeric',
                 timeZone: currentTimezone
             };
-            
-            currentTimeEl.textContent = now.toLocaleTimeString('en-US', timeOptions);
-            dateDisplayEl.textContent = now.toLocaleDateString('en-US', dateOptions);
+
+            currentTimeEl.textContent = now.toLocaleTimeString(locale, timeOptions);
+            dateDisplayEl.textContent = now.toLocaleDateString(locale, dateOptions);
         };
         
         updateTime();
@@ -385,9 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const data = await response.json();
                         const desc = data.weather[0].description;
                         const temp = Math.round(data.main.temp);
-                        
-                        // Capitalize description
-                        const formattedDesc = desc.charAt(0).toUpperCase() + desc.slice(1);
+                        const formattedDesc = translateWeatherDescription(desc);
 
                         hoverPopup
                             .setLatLng(e.latlng)
@@ -443,13 +492,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Layer Control
-            const baseMaps = {
-                "Map": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-            };
-            
-            const overlayMaps = {
-                "Precipitation (Rain/Snow)": radarLayer
-            };
+            const baseMaps = {};
+            const overlayMaps = {};
+
+            const mapLabel = isArabic ? 'الخريطة' : 'Map';
+            const precipitationLabel = isArabic ? 'هطول (مطر/ثلج)' : 'Precipitation (Rain/Snow)';
+            const cloudsLabel = isArabic ? 'السحب (قمر صناعي)' : 'Clouds (Satellite)';
+
+            baseMaps[mapLabel] = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            overlayMaps[precipitationLabel] = radarLayer;
 
             // Add layers to map and handle loading events
             let layersToLoad = 0;
@@ -461,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             if (satelliteLayer) {
-                overlayMaps["Clouds (Satellite)"] = satelliteLayer;
+                overlayMaps[cloudsLabel] = satelliteLayer;
                 satelliteLayer.addTo(map);
                 layersToLoad++;
                 satelliteLayer.on('load', checkLoad);
@@ -503,13 +554,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             cityNameEl.textContent = name || data.name;
             tempEl.textContent = `${Math.round(data.main.temp)}`;
-            descriptionEl.textContent = data.weather[0].description;
-            windSpeedEl.textContent = `${data.wind.speed} km/h`;
-            humidityEl.textContent = `${data.main.humidity}%`;
-            feelsLikeEl.textContent = `${Math.round(data.main.feels_like)}`;
-            pressureEl.textContent = `${data.main.pressure} hPa`;
-            visibilityEl.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
-            precipitationEl.textContent = `${data.precipitation} mm`;
+            descriptionEl.textContent = translateWeatherDescription(data.weather[0].description);
+            windSpeedEl.textContent = `${data.wind.speed} ${units.wind}`;
+            humidityEl.textContent = `${data.main.humidity}${units.humidity}`;
+            feelsLikeEl.textContent = `${Math.round(data.main.feels_like)}${units.feelsLike}`;
+            pressureEl.textContent = `${data.main.pressure} ${units.pressure}`;
+            visibilityEl.textContent = `${(data.visibility / 1000).toFixed(1)} ${units.visibility}`;
+            precipitationEl.textContent = `${data.precipitation} ${units.precipitation}`;
             
             updateBackground(data.weather[0].description, data.dt);
             iconContainer.innerHTML = getIconSVG(data.weather[0].description, data.is_day); 
@@ -600,8 +651,9 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const handleInitialLoadError = (error) => {
         console.error("Initial load failed:", error);
-        showError("We couldn't determine your location. Showing weather for London as a default.");
-        fetchWeather(51.5074, -0.1278, "London");
+        const msg = isArabic ? 'تعذر تحديد موقعك. يتم عرض الطقس للندن بشكل افتراضي.' : "We couldn't determine your location. Showing weather for London as a default.";
+        showError(msg);
+        fetchWeather(51.5074, -0.1278, isArabic ? 'لندن' : 'London');
     };
 
     searchInput.addEventListener('input', handleSearchInput);
@@ -640,4 +692,77 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         handleInitialLoadError(new Error("Geolocation not supported"));
     }
+
+    /* Calendar: load season and lunar house from assets/calendar.json and render */
+    const loadCalendar = async () => {
+        try {
+            const resp = await fetch('/assets/calendar.json');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const lang = document.documentElement.lang || 'en';
+            const cal = (lang.startsWith('ar') ? data.calendar_ar : data.calendar_en) || data.calendar || (lang.startsWith('ar') ? data.calendar_en : data.calendar_ar) || null;
+            if (!cal) return;
+
+            const today = new Date();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const md = `${mm}-${dd}`;
+
+            const inRange = (start, end, cur) => {
+                // start/end are MM-DD strings
+                if (start <= end) {
+                    return cur >= start && cur <= end;
+                }
+                // Wrapped range (e.g., 12-07 -> 03-19)
+                return cur >= start || cur <= end;
+            };
+
+            let currentSeason = null;
+            for (const s of cal.seasons) {
+                if (inRange(s.start, s.end, md)) {
+                    currentSeason = s;
+                    break;
+                }
+            }
+
+            let currentHouse = null;
+            if (cal.lunar_houses_cycle && Array.isArray(cal.lunar_houses_cycle)) {
+                for (const h of cal.lunar_houses_cycle) {
+                    if (inRange(h.start, h.end, md)) {
+                        currentHouse = h;
+                        break;
+                    }
+                }
+            }
+
+            const seasonEl = document.getElementById('cal-season-wide');
+            const item1 = document.getElementById('cal-item-1');
+            const item2 = document.getElementById('cal-item-2');
+
+            if (!seasonEl) return;
+
+            if (currentSeason) {
+                const name = currentSeason.name;
+                const range = `${currentSeason.start} — ${currentSeason.end}`;
+                const houseText = currentHouse ? currentHouse.name : '';
+                const houseLabel = userLang.startsWith('ar') ? 'منزلة' : 'House';
+                const houseDisplay = houseText ? `${houseLabel}: ${houseText}` : range;
+
+                seasonEl.innerHTML = `<div class="cal-season-content"><h3 class="cal-season-name">${name}</h3><p class="cal-season-sub">${houseDisplay}</p></div>`;
+                seasonEl.style.display = 'flex';
+            } else {
+                seasonEl.style.display = 'none';
+            }
+
+            // Decorative small boxes: show range and house short
+            if (item1) item1.textContent = currentSeason ? `${currentSeason.start} → ${currentSeason.end}` : '';
+            if (item2) item2.textContent = currentHouse ? currentHouse.name : '';
+
+        } catch (e) {
+            // fail silently
+            console.error('Calendar load failed', e);
+        }
+    };
+
+    loadCalendar();
 });

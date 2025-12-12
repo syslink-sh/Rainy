@@ -1,54 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="description" content="Rainy - A beautiful and fast weather application providing real-time forecasts.">
-    <meta name="keywords" content="weather, forecast, rain, temperature, humidity, wind, radar, precipitation">
+    <meta name="description" content="Rainy">
     <meta name="author" content="SySLink">
     <meta name="theme-color" content="#4facfe">
-    
-    <!-- PWA Meta Tags -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Rainy">
-    <meta name="application-name" content="Rainy">
-    <meta name="msapplication-TileColor" content="#4facfe">
-    <meta name="msapplication-tap-highlight" content="no">
-    <meta name="format-detection" content="telephone=no">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://rainy.syslink.dev/">
-    <meta property="og:title" content="Rainy - Weather App">
-    <meta property="og:description" content="A beautiful and fast weather application providing real-time forecasts.">
-    <meta property="og:image" content="https://rainy.syslink.dev/og-image.png">
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://rainy.syslink.dev/">
-    <meta name="twitter:title" content="Rainy - Weather App">
-    <meta name="twitter:description" content="A beautiful and fast weather application providing real-time forecasts.">
-    <meta name="twitter:image" content="https://rainy.syslink.dev/og-image.png">
-    
-    <title>Rainy</title>
-    
-    <!-- PWA Manifest -->
+    <title>Rainy — الطقس</title>
     <link rel="manifest" href="/manifest.json">
-    
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png">
-    
-    <!-- Splash Screens for iOS -->
-    <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
-    
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="preload" href="css/style.css" as="style">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
@@ -56,7 +18,7 @@
     <div id="global-loader" class="global-loader">
         <div class="loader-content">
             <div class="spinner-large"></div>
-            <h2>Loading Weather...</h2>
+            <h2>جاري تحميل الطقس...</h2>
         </div>
     </div>
 
@@ -69,20 +31,20 @@
     <div class="app-container">
         <header>
             <div class="header-left">
-                <a href="/" class="logo-link">
+                <a href="/index-ar.html" class="logo-link">
                         <span class="logo-icon" aria-hidden="true">🌦️</span>
                         <span class="logo-text">Rainy</span>
                 </a>
                 <div class="search-container">
                     <div class="search-bar">
-                            <input type="text" id="search-input" placeholder="Search for a city" autocomplete="off" aria-label="Search for a city">
+                            <input type="text" id="search-input" placeholder="ابحث عن مدينة" autocomplete="off" aria-label="ابحث عن مدينة">
                             <button id="search-btn" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></button>
                     </div>
                     <div id="search-results" class="search-results"></div>
                 </div>
             </div>
             <div class="location-display">
-                    <h2 id="city-name" aria-live="polite">Loading city...</h2>
+                    <h2 id="city-name" aria-live="polite">جاري التحميل...</h2>
                     <p id="country-name" aria-live="polite"></p>
                     <p id="current-time" aria-live="polite">--:--</p>
                     <p id="date-display" aria-live="polite">--</p>
@@ -102,75 +64,75 @@
             <div class="weather-details">
                 <div class="calendar-item wide" id="cal-season-wide" role="region" aria-live="polite">
                     <div class="cal-season-content">
-                        <h3 class="cal-season-name">Season</h3>
-                        <p class="cal-season-sub">House</p>
+                        <h3 class="cal-season-name">الموسم</h3>
+                        <p class="cal-season-sub">المنزله</p>
                     </div>
                 </div>
                 <div class="detail-card">
                     <i class="fas fa-temperature-high"></i>
                     <div>
-                        <span class="label">Feels Like</span>
+                        <span class="label">تشعر كأنها</span>
                         <span class="value" id="feels-like">--</span>
                     </div>
                 </div>
                 <div class="detail-card">
                     <i class="fas fa-wind"></i>
                     <div>
-                        <span class="label">Wind</span>
-                        <span class="value" id="wind-speed">-- km/h</span>
+                        <span class="label">الرياح</span>
+                        <span class="value" id="wind-speed">-- كم/س</span>
                     </div>
                 </div>
                 <div class="detail-card">
                     <i class="fas fa-tint"></i>
                     <div>
-                        <span class="label">Humidity</span>
+                        <span class="label">الرطوبة</span>
                         <span class="value" id="humidity">--%</span>
                     </div>
                 </div>
                 <div class="detail-card">
                     <i class="fas fa-compress-arrows-alt"></i>
                     <div>
-                        <span class="label">Pressure</span>
+                        <span class="label">الضغط</span>
                         <span class="value" id="pressure">-- hPa</span>
                     </div>
                 </div>
                 <div class="detail-card">
                     <i class="fas fa-eye"></i>
                     <div>
-                        <span class="label">Visibility</span>
-                        <span class="value" id="visibility">-- km</span>
+                        <span class="label">الرؤية</span>
+                        <span class="value" id="visibility">-- كم</span>
                     </div>
                 </div>
                 <div class="detail-card">
                     <i class="fas fa-cloud-rain"></i>
                     <div>
-                        <span class="label">Precipitation</span>
-                        <span class="value" id="precipitation">-- mm</span>
+                        <span class="label">الهطول</span>
+                        <span class="value" id="precipitation">-- مم</span>
                     </div>
                 </div>
             </div>
 
             <div class="radar-container">
-                    <h3 id="weather-radar-title">Weather Radar</h3>
+                    <h3 id="weather-radar-title">رادار الطقس</h3>
                 <div class="map-wrapper">
                     <div id="radar-map"></div>
                     <div id="map-loader" class="map-loader">
                         <div class="spinner"></div>
-                            <p aria-live="polite">Loading radar data...</p>
+                            <p aria-live="polite">جاري تحميل بيانات الرادار...</p>
                     </div>
                 </div>
             </div>
 
             <div class="forecast-container">
                 <div class="hourly-forecast">
-                        <h3 id="hourly-forecast-title">Hourly Forecast</h3>
+                        <h3 id="hourly-forecast-title">توقع الساعة</h3>
                     <div class="hourly-scroll" id="hourly-forecast">
                         <!-- Hourly items injected here -->
                     </div>
                 </div>
                 
                 <div class="daily-forecast">
-                        <h3 id="daily-forecast-title">7-Day Forecast</h3>
+                        <h3 id="daily-forecast-title">توقع 7 أيام</h3>
                     <div class="daily-list" id="daily-forecast">
                         <!-- Daily items injected here -->
                     </div>
@@ -183,7 +145,7 @@
         <div class="error-toast" id="error-toast"></div>
 
         <footer class="app-footer">
-            <p><a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> — <span class="lang-switch"><a href="/index-ar.html" class="lang-link" data-lang="ar">AR</a> | <a href="/" class="lang-link" data-lang="en">EN</a></span></p>
+            <p><a href="/privacy.html" target="_blank" rel="noopener noreferrer">سياسة الخصوصية</a> — <span class="lang-switch"><a href="/" class="lang-link" data-lang="en">EN</a> | <a href="/index-ar.html" class="lang-link" data-lang="ar">AR</a></span></p>
         </footer>
         </div>
         <script src="js/i18n.js" defer></script>

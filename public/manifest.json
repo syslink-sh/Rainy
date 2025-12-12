@@ -1,8 +1,8 @@
 {
     "id": "rainy-weather-app",
-    "name": "Rainy - Weather App",
+    "name": "Rainy",
     "short_name": "Rainy",
-    "description": "A beautiful and fast weather application providing real-time forecasts",
+    "description": "A fast weather application providing real-time forecasts and weather updates.",
     "lang": "en",
     "dir": "ltr",
     "start_url": "/",

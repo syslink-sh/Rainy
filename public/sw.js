@@ -2,6 +2,9 @@ const CACHE_NAME = 'rainy-weather-v2';
 const STATIC_CACHE = 'rainy-static-v2';
 const DYNAMIC_CACHE = 'rainy-dynamic-v2';
 
+// Set DEBUG to false for production; set to true for troubleshooting.
+const DEBUG = false;
+
 // Periodic sync interval (in milliseconds) - 1 hour
 const PERIODIC_SYNC_TAG = 'weather-periodic-sync';
 
@@ -22,11 +25,11 @@ const STATIC_ASSETS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-    console.log('[Service Worker] Installing...');
+    if (DEBUG) console.log('[Service Worker] Installing...');
     event.waitUntil(
         caches.open(STATIC_CACHE)
             .then((cache) => {
-                console.log('[Service Worker] Caching static assets');
+                if (DEBUG) console.log('[Service Worker] Caching static assets');
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => self.skipWaiting())
@@ -38,7 +41,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-    console.log('[Service Worker] Activating...');
+    if (DEBUG) console.log('[Service Worker] Activating...');
     event.waitUntil(
         caches.keys()
             .then((cacheNames) => {
@@ -50,7 +53,7 @@ self.addEventListener('activate', (event) => {
                                    cacheName.startsWith('rainy-');
                         })
                         .map((cacheName) => {
-                            console.log('[Service Worker] Deleting old cache:', cacheName);
+                            if (DEBUG) console.log('[Service Worker] Deleting old cache:', cacheName);
                             return caches.delete(cacheName);
                         })
                 );
@@ -95,7 +98,7 @@ async function networkOnlyStrategy(request) {
     try {
         return await fetch(request);
     } catch (error) {
-        console.log('[Service Worker] Network failed for API:', request.url);
+        if (DEBUG) console.log('[Service Worker] Network failed for API:', request.url);
         
         // Return offline error for weather API
         if (request.url.includes('/api/weather')) {
@@ -246,7 +249,7 @@ self.addEventListener('periodicsync', (event) => {
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'ONLINE_STATUS_CHANGED') {
         if (event.data.isOnline) {
-            console.log('[Service Worker] Back online - refreshing caches...');
+                    if (DEBUG) console.log('[Service Worker] Back online - refreshing caches...');
             refreshAllCaches();
         }
     }
@@ -261,14 +264,14 @@ self.addEventListener('message', (event) => {
 });
 
 async function syncWeatherData() {
-    console.log('[Service Worker] Syncing weather data...');
+    if (DEBUG) console.log('[Service Worker] Syncing weather data...');
     // Implementation for background sync when coming back online
     // This can be expanded to sync saved locations, etc.
 }
 
 // Periodic sync to keep weather data fresh
 async function periodicWeatherSync() {
-    console.log('[Service Worker] Periodic weather sync triggered...');
+    if (DEBUG) console.log('[Service Worker] Periodic weather sync triggered...');
     try {
         // Notify all clients to refresh their weather data
         const clients = await self.clients.matchAll({ type: 'window' });
@@ -285,7 +288,7 @@ async function periodicWeatherSync() {
 
 // Refresh all cached static assets when internet becomes available
 async function refreshAllCaches() {
-    console.log('[Service Worker] Refreshing all caches...');
+    if (DEBUG) console.log('[Service Worker] Refreshing all caches...');
     try {
         const cache = await caches.open(STATIC_CACHE);
         
@@ -297,10 +300,10 @@ async function refreshAllCaches() {
                     const response = await fetch(url, { cache: 'no-cache' });
                     if (response.ok) {
                         await cache.put(url, response);
-                        console.log('[Service Worker] Refreshed:', url);
+                        if (DEBUG) console.log('[Service Worker] Refreshed:', url);
                     }
                 } catch (err) {
-                    console.log('[Service Worker] Failed to refresh:', url);
+                    if (DEBUG) console.log('[Service Worker] Failed to refresh:', url);
                 }
             });
         
@@ -323,7 +326,7 @@ async function refreshAllCaches() {
         
         await Promise.all(dynamicRefreshPromises);
         
-        console.log('[Service Worker] Cache refresh complete');
+        if (DEBUG) console.log('[Service Worker] Cache refresh complete');
         
         // Notify clients that cache has been refreshed
         const clients = await self.clients.matchAll({ type: 'window' });

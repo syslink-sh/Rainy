@@ -1,7 +1,7 @@
 {
-    "id": "rainy-weather-app",
-    "name": "Rainy",
-    "short_name": "Rainy",
+    "id": "saudi-weather-app",
+    "name": "Saudi Weather",
+    "short_name": "Saudi Weather",
     "description": "A fast weather application providing real-time forecasts and weather updates.",
     "lang": "en",
     "dir": "ltr",
@@ -72,14 +72,14 @@
             "sizes": "1280x720",
             "type": "image/png",
             "form_factor": "wide",
-            "label": "Rainy Weather App - Desktop View"
+            "label": "Saudi Weather App - Desktop View"
         },
         {
             "src": "/screenshots/screenshot-mobile.png",
             "sizes": "750x1334",
             "type": "image/png",
             "form_factor": "narrow",
-            "label": "Rainy Weather App - Mobile View"
+            "label": "Saudi Weather App - Mobile View"
         }
     ],
     "shortcuts": [
@@ -96,8 +96,8 @@
     "related_applications": [
         {
             "platform": "play",
-            "url": "https://play.google.com/store/apps/details?id=com.faisalalsharif.rainy",
-            "id": "com.example.rainy"
+            "url": "https://play.google.com/store/apps/details?id=dev.syslink.rainy.twa",
+            "id": "dev.syslink.rainy.twa"
         }
     ],
     "file_handlers": [
@@ -109,7 +109,7 @@
     ],
     "protocol_handlers": [
         {
-            "protocol": "web+rainy",
+            "protocol": "web+saudiweather",
             "url": "/?weather=%s"
         }
     ],
@@ -133,14 +133,10 @@
     ],
     "edge_side_panel": {
         "preferred_width": 400,
-        "title": "Rainy Weather Side Panel",
+        "title": "Saudi Weather Side Panel",
         "icon": "/icons/icon-192x192.png"
     },
     "note_taking": {
         "new_note_url": "/notes/new"
-    },
-    "scope_extensions": [
-        "https://api.rainviewer.com",
-        "https://open-meteo.com"
-    ]
+    }
 }

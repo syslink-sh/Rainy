@@ -12,13 +12,13 @@ module.exports = {
     // CORS Configuration
     cors: {
         allowedOrigins: process.env.ALLOWED_ORIGINS 
-            ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
+            ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(s => s && s.length > 0)
             : [
                 'http://localhost:3005',
                 'http://localhost:5150',
                 'http://127.0.0.1:3005',
                 'http://127.0.0.1:5150',
-                'https://rainy.syslink.dev'
+                'https://saudiweather.syslink.dev'
             ],
     },
 

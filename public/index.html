@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="description" content="Rainy - A beautiful and fast weather application providing real-time forecasts.">
+    <meta name="description" content="Saudi Weather - A fast weather application providing real-time forecasts for Saudi Arabia.">
     <meta name="keywords" content="weather, forecast, rain, temperature, humidity, wind, radar, precipitation">
     <meta name="author" content="SySLink">
     <meta name="theme-color" content="#4facfe">
@@ -12,27 +12,27 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Rainy">
-    <meta name="application-name" content="Rainy">
+    <meta name="apple-mobile-web-app-title" content="Saudi Weather">
+    <meta name="application-name" content="Saudi Weather">
     <meta name="msapplication-TileColor" content="#4facfe">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="format-detection" content="telephone=no">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://rainy.syslink.dev/">
-    <meta property="og:title" content="Rainy - Weather App">
-    <meta property="og:description" content="A beautiful and fast weather application providing real-time forecasts.">
-    <meta property="og:image" content="https://rainy.syslink.dev/og-image.png">
+    <meta property="og:url" content="https://saudiweather.syslink.dev/">
+    <meta property="og:title" content="Saudi Weather">
+    <meta property="og:description" content="Fast weather forecasts focused on Saudi Arabia.">
+    <meta property="og:image" content="https://saudiweather.syslink.dev/og-image.png">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://rainy.syslink.dev/">
-    <meta name="twitter:title" content="Rainy - Weather App">
-    <meta name="twitter:description" content="A beautiful and fast weather application providing real-time forecasts.">
-    <meta name="twitter:image" content="https://rainy.syslink.dev/og-image.png">
+    <meta name="twitter:url" content="https://saudiweather.syslink.dev/">
+    <meta name="twitter:title" content="Saudi Weather">
+    <meta name="twitter:description" content="Fast weather forecasts focused on Saudi Arabia.">
+    <meta name="twitter:image" content="https://saudiweather.syslink.dev/og-image.png">
     
-    <title>Rainy</title>
+    <title>Saudi Weather</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -46,9 +46,7 @@
     <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
     
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preload" href="css/style.css" as="style">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
@@ -71,7 +69,7 @@
             <div class="header-left">
                 <a href="/" class="logo-link">
                         <span class="logo-icon" aria-hidden="true">🌦️</span>
-                        <span class="logo-text">Rainy</span>
+                        <span class="logo-text">Saudi Weather</span>
                 </a>
                 <div class="search-container">
                     <div class="search-bar">
@@ -150,17 +148,6 @@
                 </div>
             </div>
 
-            <div class="radar-container">
-                    <h3 id="weather-radar-title">Weather Radar</h3>
-                <div class="map-wrapper">
-                    <div id="radar-map"></div>
-                    <div id="map-loader" class="map-loader">
-                        <div class="spinner"></div>
-                            <p aria-live="polite">Loading radar data...</p>
-                    </div>
-                </div>
-            </div>
-
             <div class="forecast-container">
                 <div class="hourly-forecast">
                         <h3 id="hourly-forecast-title">Hourly Forecast</h3>
@@ -183,14 +170,13 @@
         <div class="error-toast" id="error-toast"></div>
 
         <footer class="app-footer">
-            <p><a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> — <span class="lang-switch"><a href="/index-ar.html" class="lang-link" data-lang="ar">AR</a> | <a href="/" class="lang-link" data-lang="en">EN</a></span></p>
+            <p><a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> — <span class="lang-switch"><a href="/ar/" class="lang-link" data-lang="ar">AR</a> | <a href="/" class="lang-link" data-lang="en">EN</a></span></p>
         </footer>
         </div>
         <script src="js/i18n.js" defer></script>
     </div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="js/config.js"></script>
-    <script src="js/main.js" defer></script>
+    <script src="js/main.js?v=10"></script>
     
     <!-- Service Worker Registration -->
     <script>
@@ -229,7 +215,7 @@
 
         // Track successful installation
         window.addEventListener('appinstalled', () => {
-            if (window.appConfig?.debug) console.log('🌦️ Rainy has been installed!');
+            if (window.appConfig?.debug) console.log('🌦️ Saudi Weather has been installed!');
             deferredPrompt = null;
         });
     </script>

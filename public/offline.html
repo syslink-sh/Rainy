@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Offline — Saudi Weather</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="weather-bg" class="weather-bg clear">
+    <div class="bg-layer layer-1"></div>
+    <div class="bg-layer layer-2"></div>
+    <div class="bg-layer layer-3"></div>
+  </div>
+
+  <div class="app-container">
+    <header>
+      <div class="header-left">
+        <a href="/" class="logo-link">
+          <span class="logo-icon" aria-hidden="true">🌦️</span>
+          <span class="logo-text">Saudi Weather</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="offline-main" style="max-width:900px;margin:3rem auto;padding:1rem;text-align:center;">
+      <h1>You're offline</h1>
+      <p>Some features may be unavailable while you're offline. Please check your connection and try again.</p>
+      <p>
+        <button id="retry-btn" class="btn">Retry</button>
+        <a href="/" class="btn btn-link">Return to home</a>
+      </p>
+    </main>
+
+    <footer class="app-footer">
+      <p><a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a> — <span class="lang-switch"><a href="/ar/" class="lang-link" data-lang="ar">AR</a> | <a href="/" class="lang-link" data-lang="en">EN</a></span></p>
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('retry-btn')?.addEventListener('click', () => {
+      if (navigator.onLine) location.reload();
+      else alert('Still offline — please check your connection.');
+    });
+  </script>
+</body>
+</html>

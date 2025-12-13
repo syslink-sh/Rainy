@@ -1,74 +1,113 @@
-// Set DEBUG to false for production; true for troubleshooting
-const DEBUG = false;
+const CACHE_NAME = 'saudi-weather-v1';
+const PRECACHE_URLS = [
+    '/',
+    '/index.html',
+    '/offline.html',
+    '/ar/',
+    '/css/style.css',
+    '/js/main.js',
+    '/js/config.js',
+    '/js/i18n.js',
+    '/manifest.json'
+];
 
-// Periodic sync interval (in milliseconds) - optional
-const PERIODIC_SYNC_TAG = 'weather-periodic-sync';
-
-// Install event - just activate immediately
 self.addEventListener('install', (event) => {
-    if (DEBUG) console.log('[Service Worker] Installing...');
-    event.waitUntil(self.skipWaiting());
+    event.waitUntil((async () => {
+        const cache = await caches.open(CACHE_NAME);
+        // Precache each url but don't fail the whole install if one item is missing
+        await Promise.allSettled(PRECACHE_URLS.map(async (url) => {
+            try {
+                const resp = await fetch(url, { cache: 'no-cache' });
+                if (resp && resp.ok) {
+                    await cache.put(url, resp.clone());
+                }
+            } catch (e) {
+                // ignore individual failures
+            }
+        }));
+        await self.skipWaiting();
+    })());
 });
 
-// Activate event - just claim clients
 self.addEventListener('activate', (event) => {
-    if (DEBUG) console.log('[Service Worker] Activating...');
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(
+        caches.keys().then(keys => Promise.all(
+            keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        )).then(() => self.clients.claim())
+    );
 });
 
-// Fetch event - network only, no caching
+// Helper: network-first for API, cache-first for assets, fallback to index for navigation
 self.addEventListener('fetch', (event) => {
     const { request } = event;
 
     if (request.method !== 'GET') return;
 
-    try {
-        const url = new URL(request.url);
-        if (!url.protocol.startsWith('http')) return;
-    } catch (e) {
+    const url = new URL(request.url);
+
+    // Only handle http(s) requests
+    if (!url.protocol.startsWith('http')) return;
+
+    // API requests -> network-first
+    if (url.pathname.startsWith('/api/')) {
+        event.respondWith(
+            fetch(request).then(resp => {
+                // Optionally cache API responses (not persisted long-term)
+                return resp;
+            }).catch(() => caches.match(request).then(cached => cached || new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } })))
+        );
         return;
     }
 
-    event.respondWith(networkOnlyStrategy(request));
-});
-
-// Network-only strategy
-async function networkOnlyStrategy(request) {
-    try {
-        return await fetch(request);
-    } catch (error) {
-        if (DEBUG) console.log('[Service Worker] Network failed for request:', request.url);
-
-        // Unified offline response text as requested
-        const offlineText = 'OFFLINE NO INTERNET';
-
-        if (request.mode === 'navigate') {
-            const offlineHtml = `<!doctype html><html><head><meta charset="utf-8"><title>Offline</title></head><body><h1>OFFLINE NO INTERNET</h1><p>OFFLINE NO INTERNET</p></body></html>`;
-            return new Response(offlineHtml, {
-                status: 503,
-                headers: { 'Content-Type': 'text/html' }
-            });
-        }
-
-        if (request.headers.get('accept')?.includes('application/json') || request.url.includes('/api/')) {
-            return new Response(JSON.stringify({ error: 'offline', message: offlineText }), {
-                status: 503,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        return new Response(offlineText, {
-            status: 503,
-            headers: { 'Content-Type': 'text/plain' }
-        });
+    // Navigation requests -> return cached index.html fallback or offline page
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request).then(resp => resp).catch(async () => {
+                // Try cached index.html first
+                const cachedIndex = await caches.match('/index.html');
+                if (cachedIndex) return cachedIndex;
+                // Then try an offline fallback page if precached
+                const offline = await caches.match('/offline.html');
+                if (offline) return offline;
+                // As a last resort return a minimal HTML response
+                return new Response('<!doctype html><html><head><meta charset="utf-8"><title>Offline</title></head><body><h1>Offline</h1><p>Content is unavailable while offline.</p></body></html>', { headers: { 'Content-Type': 'text/html' } });
+            })
+        );
+        return;
     }
-}
+
+    // Static assets -> cache-first
+    event.respondWith(
+        caches.match(request).then(cached => cached || fetch(request).then(networkResp => {
+            // Put in cache for future requests (ignore opaque responses)
+            if (networkResp && networkResp.status === 200 && networkResp.type !== 'opaque') {
+                const copy = networkResp.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+            }
+            return networkResp;
+        }).catch(() => {
+            // fallback for images or fonts could be provided here
+            return new Response('OFFLINE', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        }))
+    );
+});
 
 // Push notifications
 self.addEventListener('push', (event) => {
     if (!event.data) return;
 
-    const data = event.data.json();
+    let data = null;
+    try {
+        data = event.data.json();
+    } catch (e) {
+        try {
+            const text = event.data.text();
+            data = { title: 'Saudi Weather', body: text };
+        } catch (e2) {
+            data = { title: 'Saudi Weather', body: 'Weather update available' };
+        }
+    }
+
     const options = {
         body: data.body || 'Weather update available',
         icon: '/icons/icon-192x192.png',
@@ -81,7 +120,7 @@ self.addEventListener('push', (event) => {
         ]
     };
 
-    event.waitUntil(self.registration.showNotification(data.title || 'Rainy Weather', options));
+    event.waitUntil(self.registration.showNotification(data.title || 'Saudi Weather', options));
 });
 
 // Notification click
@@ -99,21 +138,6 @@ self.addEventListener('notificationclick', (event) => {
             if (clients.openWindow) return clients.openWindow(urlToOpen);
         })
     );
-});
-
-// Background sync (optional)
-self.addEventListener('sync', (event) => {
-    if (event.tag === 'sync-weather') {
-        if (DEBUG) console.log('[Service Worker] Background sync triggered');
-        // No caching, just notify clients if needed
-    }
-});
-
-// Periodic sync (optional)
-self.addEventListener('periodicsync', (event) => {
-    if (event.tag === PERIODIC_SYNC_TAG) {
-        if (DEBUG) console.log('[Service Worker] Periodic sync triggered');
-    }
 });
 
 // Messages from clients

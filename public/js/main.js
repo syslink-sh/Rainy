@@ -37,9 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const dailyForecastEl = document.getElementById('daily-forecast');
 
     let searchTimeout;
+    let weatherFetchController = null;
+    let searchFetchController = null;
     let currentLat = null;
     let currentLon = null;
     let currentCityName = null;
+
+    // Basic DOM checks - if a few core elements are missing, stop further UI setup
+    if (!searchInput || !cityNameEl || !tempEl || !descriptionEl || !iconContainer) {
+        console.error('Essential UI elements are missing, aborting initialization');
+        return;
+    }
 
     // Register for periodic sync and setup online/offline handlers
     // Improves offline experience and keeps weather data fresh
@@ -48,21 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
             // Listen for messages from service worker
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data && event.data.type === 'PERIODIC_SYNC') {
-                    if (window.appConfig?.debug) console.log('[Rainy] Weather data refreshed automatically.');
+                    if (window.appConfig?.debug) console.log('[Saudi Weather] Weather data refreshed automatically.');
                     if (currentLat && currentLon) {
                         fetchWeather(currentLat, currentLon, currentCityName, true);
                     }
                 }
                 if (event.data && event.data.type === 'CACHE_REFRESHED') {
-                    if (window.appConfig?.debug) console.log('[Rainy] Cache updated for offline use.');
+                    if (window.appConfig?.debug) console.log('[Saudi Weather] Cache updated for offline use.');
                 }
             });
 
             // Register periodic sync if supported
-            if ('periodicSync' in navigator.serviceWorker.registration) {
-                try {
-                    await navigator.serviceWorker.ready;
-                    const registration = await navigator.serviceWorker.getRegistration();
+            try {
+                await navigator.serviceWorker.ready;
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration && 'periodicSync' in registration) {
                     const status = await navigator.permissions.query({
                         name: 'periodic-background-sync',
                     });
@@ -70,11 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         await registration.periodicSync.register('weather-periodic-sync', {
                             minInterval: 60 * 60 * 1000, // 1 hour
                         });
-                            if (window.appConfig?.debug) console.log('[Rainy] Periodic sync registered.');
+                        if (window.appConfig?.debug) console.log('[Saudi Weather] Periodic sync registered.');
                     }
-                } catch (error) {
-                    if (window.appConfig?.debug) console.log('[Rainy] Periodic sync registration failed:', error);
                 }
+            } catch (error) {
+                if (window.appConfig?.debug) console.log('[Saudi Weather] Periodic sync registration failed:', error);
             }
         }
     };
@@ -83,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Improves user feedback and cache refresh
     const setupConnectivityListeners = () => {
         window.addEventListener('online', () => {
-            if (window.appConfig?.debug) console.log('[Rainy] You are back online. Weather data will be refreshed.');
+            if (window.appConfig?.debug) console.log('[Saudi Weather] You are back online. Weather data will be refreshed.');
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     type: 'ONLINE_STATUS_CHANGED',
@@ -97,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         window.addEventListener('offline', () => {
-            if (window.appConfig?.debug) console.log('[Rainy] You are offline. Cached data will be shown.');
+            if (window.appConfig?.debug) console.log('[Saudi Weather] You are offline. Cached data will be shown.');
             showError(isArabic ? 'أنت غير متصل بالإنترنت. عرض بيانات مخزنة مؤقتًا.' : 'You are offline. Cached weather data is displayed.');
         });
     };
@@ -120,10 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderHourlyForecast = (hourly) => {
+        if (!hourlyForecastEl) return;
         hourlyForecastEl.innerHTML = '';
         const now = new Date();
         const currentHour = now.getHours();
-
+        const fragment = document.createDocumentFragment();
         hourly.time.forEach((timeStr, index) => {
             const time = new Date(timeStr);
             const hour = time.getHours();
@@ -132,18 +141,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index < 24) {
                 const div = document.createElement('div');
                 div.className = 'hourly-item';
-                div.innerHTML = `
-                    <span class="time">${hour}:00</span>
-                    <i class="fas ${getWeatherIconClass(hourly.weather_code[index])} icon"></i>
-                    <span class="temp">${Math.round(hourly.temperature_2m[index])}</span>
-                `;
-                hourlyForecastEl.appendChild(div);
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'time';
+                timeSpan.textContent = `${hour}:00`;
+                const iconI = document.createElement('i');
+                iconI.className = `fas ${getWeatherIconClass(hourly.weather_code[index])} icon`;
+                const tempSpan = document.createElement('span');
+                tempSpan.className = 'temp';
+                tempSpan.textContent = Math.round(hourly.temperature_2m[index]);
+                div.appendChild(timeSpan);
+                div.appendChild(iconI);
+                div.appendChild(tempSpan);
+                fragment.appendChild(div);
             }
         });
+        hourlyForecastEl.appendChild(fragment);
     };
 
     const renderDailyForecast = (daily) => {
+        if (!dailyForecastEl) return;
         dailyForecastEl.innerHTML = '';
+        const fragment = document.createDocumentFragment();
         
         daily.time.forEach((timeStr, index) => {
             const date = new Date(timeStr);
@@ -152,20 +170,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const div = document.createElement('div');
             div.className = 'daily-item';
-            div.innerHTML = `
-                <span class="day">${index === 0 ? todayLabel : dayName}</span>
-                <div class="icon"><i class="fas ${getWeatherIconClass(daily.weather_code[index])}"></i></div>
-                <div class="temps">
-                    <span class="max">${Math.round(daily.temperature_2m_max[index])}</span>
-                    <span class="min">${Math.round(daily.temperature_2m_min[index])}</span>
-                </div>
-            `;
-            dailyForecastEl.appendChild(div);
+            const daySpan = document.createElement('span');
+            daySpan.className = 'day';
+            daySpan.textContent = index === 0 ? todayLabel : dayName;
+            const iconWrap = document.createElement('div');
+            iconWrap.className = 'icon';
+            const iconI = document.createElement('i');
+            iconI.className = `fas ${getWeatherIconClass(daily.weather_code[index])}`;
+            iconWrap.appendChild(iconI);
+            const temps = document.createElement('div');
+            temps.className = 'temps';
+            const max = document.createElement('span');
+            max.className = 'max';
+            max.textContent = Math.round(daily.temperature_2m_max[index]);
+            const min = document.createElement('span');
+            min.className = 'min';
+            min.textContent = Math.round(daily.temperature_2m_min[index]);
+            temps.appendChild(max);
+            temps.appendChild(min);
+            div.appendChild(daySpan);
+            div.appendChild(iconWrap);
+            div.appendChild(temps);
+            fragment.appendChild(div);
         });
+        dailyForecastEl.appendChild(fragment);
     };
 
-    const getIconSVG = (description, isDay) => {
-        const desc = description ? description.toLowerCase() : '';
+    const getIconSVG = (code, isDay) => {
         const isNight = isDay === 0;
         
         // Common gradients and filters
@@ -269,13 +300,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let content = '';
 
-        if (desc.includes('rain') || desc.includes('drizzle')) {
+        if (code >= 51 && code <= 67) {
             content = `<g filter="url(#cloudShadow)">${darkCloudPath}${rainDrops}</g>`;
-        } else if (desc.includes('thunder')) {
+        } else if (code >= 95 && code <= 99) {
             content = `<g filter="url(#cloudShadow)">${darkCloudPath}${lightning}</g>`;
-        } else if (desc.includes('snow')) {
+        } else if (code >= 71 && code <= 86) {
             content = `<g filter="url(#cloudShadow)">${cloudPath}${snowFlakes}</g>`;
-        } else if (desc.includes('cloud') || desc.includes('overcast') || desc.includes('fog')) {
+        } else if ((code >= 2 && code <= 3) || code === 45 || code === 48) {
             content = `<g filter="url(#cloudShadow)">${cloudPath}</g>`;
         } else {
             // Clear / Default - sun or moon based on time
@@ -393,149 +424,13 @@ document.addEventListener('DOMContentLoaded', () => {
         timeInterval = setInterval(updateTime, 1000);
     };
 
-    let map;
-    let radarLayer;
-    let satelliteLayer;
-    let layerControl;
-    let hoverTimeout;
-    let hoverPopup;
-
-    const initMap = (lat, lon) => {
-        if (typeof L === 'undefined') {
-            console.error('Leaflet library is not loaded.');
-            return;
-        }
-
-        if (!map) {
-            map = L.map('radar-map').setView([lat, lon], 8);
-            
-            const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            
-            addRadarLayers();
-
-            // Initialize hover popup
-            hoverPopup = L.popup({
-                closeButton: false,
-                className: 'weather-hover-popup',
-                offset: L.point(0, -10)
-            });
-
-            // Add hover interaction
-            map.on('mousemove', (e) => {
-                const { lat, lng } = e.latlng;
-                
-                clearTimeout(hoverTimeout);
-                
-                hoverTimeout = setTimeout(async () => {
-                    try {
-                        const apiBase = window.appConfig?.apiBaseUrl || '/api';
-                        const response = await fetch(`${apiBase}/weather?lat=${lat}&lon=${lng}`);
-                        if (!response.ok) return;
-                        const data = await response.json();
-                        const desc = data.weather[0].description;
-                        const temp = Math.round(data.main.temp);
-                        const formattedDesc = translateWeatherDescription(desc);
-
-                        hoverPopup
-                            .setLatLng(e.latlng)
-                            .setContent(`<div class="map-hover-content"><b>${formattedDesc}</b><br>${temp}°</div>`)
-                            .openOn(map);
-                    } catch (err) {
-                        console.error(err);
-                    }
-                }, 600); // 600ms delay
-            });
-
-            map.on('mouseout', () => {
-                clearTimeout(hoverTimeout);
-                map.closePopup();
-            });
-
-            map.on('movestart', () => {
-                clearTimeout(hoverTimeout);
-                map.closePopup();
-            });
-
-        } else {
-            map.setView([lat, lon], 8);
-        }
-    };
-
-    const addRadarLayers = async () => {
-        const loader = document.getElementById('map-loader');
-        loader.classList.add('active');
-
-        try {
-            const response = await fetch('https://api.rainviewer.com/public/weather-maps.json');
-            const data = await response.json();
-            const host = data.host;
-
-            // Radar (Precipitation)
-            const latestRadar = data.radar.past[data.radar.past.length - 1];
-            radarLayer = L.tileLayer(`${host}${latestRadar.path}/256/{z}/{x}/{y}/2/1_1.png`, {
-                opacity: 0.8,
-                attribution: '&copy; <a href="https://www.rainviewer.com">RainViewer</a>'
-            });
-
-            // Satellite (Clouds) - Infrared
-            let satelliteUrl = '';
-            if (data.satellite && data.satellite.infrared && data.satellite.infrared.length > 0) {
-                const latestSatellite = data.satellite.infrared[data.satellite.infrared.length - 1];
-                satelliteUrl = `${host}${latestSatellite.path}/256/{z}/{x}/{y}/0/0_0.png`; // 0 color scheme for satellite
-                
-                satelliteLayer = L.tileLayer(satelliteUrl, {
-                    opacity: 0.6,
-                    attribution: '&copy; <a href="https://www.rainviewer.com">RainViewer</a>'
-                });
-            }
-
-            // Layer Control
-            const baseMaps = {};
-            const overlayMaps = {};
-
-            const mapLabel = isArabic ? 'الخريطة' : 'Map';
-            const precipitationLabel = isArabic ? 'هطول (مطر/ثلج)' : 'Precipitation (Rain/Snow)';
-            const cloudsLabel = isArabic ? 'السحب (قمر صناعي)' : 'Clouds (Satellite)';
-
-            baseMaps[mapLabel] = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-            overlayMaps[precipitationLabel] = radarLayer;
-
-            // Add layers to map and handle loading events
-            let layersToLoad = 0;
-            const checkLoad = () => {
-                layersToLoad--;
-                if (layersToLoad <= 0) {
-                    loader.classList.remove('active');
-                }
-            };
-
-            if (satelliteLayer) {
-                overlayMaps[cloudsLabel] = satelliteLayer;
-                satelliteLayer.addTo(map);
-                layersToLoad++;
-                satelliteLayer.on('load', checkLoad);
-            }
-
-            radarLayer.addTo(map);
-            layersToLoad++;
-            radarLayer.on('load', checkLoad);
-            radarLayer.bringToFront();
-
-            if (layerControl) {
-                map.removeControl(layerControl);
-            }
-            
-            layerControl = L.control.layers(null, overlayMaps).addTo(map);
-            
-        } catch (e) {
-            console.error("Failed to load radar layers", e);
-            loader.classList.remove('active');
-        }
-    };
-
     const fetchWeather = async (lat, lon, name, silent = false) => {
+        // Cancel any in-flight weather request to avoid race condition
+        if (weatherFetchController) {
+            try { weatherFetchController.abort(); } catch (e){}
+        }
+        weatherFetchController = new AbortController();
+        const signal = weatherFetchController.signal;
         if (!silent) {
             globalLoader.classList.remove('hidden');
         }
@@ -547,26 +442,26 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             const apiBase = window.appConfig?.apiBaseUrl || '/api';
-            const response = await fetch(`${apiBase}/weather?lat=${lat}&lon=${lon}`);
+            const response = await fetch(`${apiBase}/weather?lat=${lat}&lon=${lon}`, { signal });
             if (!response.ok) throw new Error('Weather data unavailable');
             
             const data = await response.json();
             
             cityNameEl.textContent = name || data.name;
-            tempEl.textContent = `${Math.round(data.main.temp)}`;
+            tempEl.textContent = data.main.temp ? `${Math.round(data.main.temp)}` : '--';
             descriptionEl.textContent = translateWeatherDescription(data.weather[0].description);
-            windSpeedEl.textContent = `${data.wind.speed} ${units.wind}`;
-            humidityEl.textContent = `${data.main.humidity}${units.humidity}`;
-            feelsLikeEl.textContent = `${Math.round(data.main.feels_like)}${units.feelsLike}`;
-            pressureEl.textContent = `${data.main.pressure} ${units.pressure}`;
-            visibilityEl.textContent = `${(data.visibility / 1000).toFixed(1)} ${units.visibility}`;
-            precipitationEl.textContent = `${data.precipitation} ${units.precipitation}`;
+            windSpeedEl.textContent = data.wind && data.wind.speed ? `${data.wind.speed} ${units.wind}` : `-- ${units.wind}`;
+            humidityEl.textContent = data.main.humidity ? `${data.main.humidity}${units.humidity}` : `--${units.humidity}`;
+            feelsLikeEl.textContent = data.main.feels_like ? `${Math.round(data.main.feels_like)}${units.feelsLike}` : `--${units.feelsLike}`;
+            pressureEl.textContent = data.main.pressure ? `${data.main.pressure} ${units.pressure}` : `-- ${units.pressure}`;
+            visibilityEl.textContent = data.visibility ? `${(data.visibility / 1000).toFixed(1)} ${units.visibility}` : `-- ${units.visibility}`;
+            precipitationEl.textContent = data.precipitation ? `${data.precipitation} ${units.precipitation}` : `-- ${units.precipitation}`;
             
             updateBackground(data.weather[0].description, data.dt);
-            iconContainer.innerHTML = getIconSVG(data.weather[0].description, data.is_day); 
+            // Render icon using numeric weather code to ensure safe, predictable output
+            if (iconContainer) iconContainer.innerHTML = getIconSVG(data.weather[0].code, data.is_day);
             
             updateDateTime(data.timezone);
-            initMap(lat, lon);
             
             if (data.hourly) renderHourlyForecast(data.hourly);
             if (data.daily) renderDailyForecast(data.daily);
@@ -574,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchResultsEl.style.display = 'none';
 
         } catch (error) {
-            showError(error.message);
+            if (error.name !== 'AbortError') showError(error.message);
         } finally {
             if (!silent) {
                 setTimeout(() => {
@@ -594,18 +489,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        searchTimeout = setTimeout(async () => {
+            const debounceMs = window.appConfig?.searchDebounce || 150;
+            searchTimeout = setTimeout(async () => {
             try {
+            if (searchFetchController) { try { searchFetchController.abort(); } catch (e) {} }
+            searchFetchController = new AbortController();
+            const ssignal = searchFetchController.signal;
                 const apiBase = window.appConfig?.apiBaseUrl || '/api';
-                const response = await fetch(`${apiBase}/search?q=${encodeURIComponent(query)}`);
+            const response = await fetch(`${apiBase}/search?q=${encodeURIComponent(query)}`, { signal: ssignal });
                 if (!response.ok) return;
                 
                 const locations = await response.json();
                 renderSearchResults(locations);
             } catch (error) {
-                console.error("Search error", error);
+                if (error.name !== 'AbortError') console.error("Search error", error);
             }
-        }, 150);
+        }, debounceMs);
     };
 
     const renderSearchResults = (locations) => {
@@ -616,14 +515,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         locations.forEach(loc => {
+            const displayName = isArabic && loc.arabic ? loc.arabic : loc.name;
             const div = document.createElement('div');
             div.className = 'search-result-item';
-            div.innerHTML = `
-                <span class="city">${loc.name}</span>
-                <span class="country">${loc.region ? loc.region + ', ' : ''}${loc.country}</span>
-            `;
+            const citySpan = document.createElement('span');
+            citySpan.className = 'city';
+            citySpan.textContent = displayName;
+            const countrySpan = document.createElement('span');
+            countrySpan.className = 'country';
+            countrySpan.textContent = `${loc.region ? loc.region + ', ' : ''}${loc.country}`;
+            div.appendChild(citySpan);
+            div.appendChild(countrySpan);
             div.addEventListener('click', () => {
-                searchInput.value = loc.name;
+                searchInput.value = displayName;
                 countryNameEl.textContent = loc.country || '';
                 fetchWeather(loc.lat, loc.lon, loc.name);
             });
@@ -752,12 +656,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const seasonEl = document.getElementById('cal-season-wide');
-            const item1 = document.getElementById('cal-item-1');
-            const item2 = document.getElementById('cal-item-2');
 
-            if (!seasonEl) return;
+                if (!seasonEl) return;
 
-            if (currentSeasonKey) {
+                    if (currentSeasonKey) {
                 // Determine locale code for calendar names ('en' or 'ar')
                 const langCode = userLang.startsWith('ar') ? 'ar' : 'en';
 
@@ -768,15 +670,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const monthNum = mm; // already padded '01'..'12'
                 const monthValue = (data.weather_month && data.weather_month[langCode] && data.weather_month[langCode][monthNum]) || '';
 
-                seasonEl.innerHTML = `<div class="cal-season-content"><h3 class="cal-season-name">${seasonName}</h3><p class="cal-season-sub">${monthValue}</p></div>`;
+                const content = document.createElement('div');
+                content.className = 'cal-season-content';
+                const h3 = document.createElement('h3');
+                h3.className = 'cal-season-name';
+                h3.textContent = seasonName;
+                const p = document.createElement('p');
+                p.className = 'cal-season-sub';
+                p.textContent = monthValue;
+                content.appendChild(h3);
+                content.appendChild(p);
+                seasonEl.innerHTML = '';
+                seasonEl.appendChild(content);
                 seasonEl.style.display = 'flex';
 
-                if (item1) item1.textContent = currentSeasonRange || '';
-                if (item2) item2.textContent = monthValue || '';
+                // seasonEl contains the visible season text; no separate cal-item elements present
             } else {
                 seasonEl.style.display = 'none';
-                if (item1) item1.textContent = '';
-                if (item2) item2.textContent = '';
             }
 
         } catch (e) {

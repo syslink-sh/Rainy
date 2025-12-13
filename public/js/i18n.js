@@ -1,6 +1,6 @@
 // Simple i18n helper: set/get language cookie and redirect to matching page
 (function(){
-    const COOKIE_NAME = 'rainy_lang';
+    const COOKIE_NAME = 'saudiweather_lang';
 
     function setCookie(name, value, days) {
         let expires = '';
@@ -9,7 +9,9 @@
             date.setTime(date.getTime() + (days*24*60*60*1000));
             expires = '; expires=' + date.toUTCString();
         }
-        document.cookie = name + '=' + (value || '')  + expires + '; path=/';
+        const secure = location.protocol === 'https:' ? '; Secure' : '';
+        const sameSite = '; SameSite=Lax';
+        document.cookie = name + '=' + encodeURIComponent(value || '')  + expires + '; path=/' + sameSite + secure;
     }
 
     function getCookie(name) {
@@ -24,26 +26,25 @@
     }
 
     function computeAlternate(path, lang) {
-        // If switching to Arabic
+        const p = path || '/';
         if (lang === 'ar') {
-            if (path === '/' || path === '/index.html') return '/index-ar.html';
-            if (path.endsWith('/')) return '/index-ar.html';
-            if (path.endsWith('.html')) {
-                if (path.includes('-ar.html')) return path; // already ar
-                return path.replace('.html', '-ar.html');
+            if (p.startsWith('/ar/') || p === '/ar' || p === '/ar/') return p;
+            if (p === '/' || p === '/index.html') return '/ar/';
+            if (p.endsWith('.html')) {
+                const base = p.split('/').pop();
+                return '/ar/' + base;
             }
-            return '/index-ar.html';
+            return '/ar/';
         }
 
-        // Switching to English
         if (lang === 'en') {
-            if (path === '/index-ar.html') return '/';
-            if (path.endsWith('-ar.html')) return path.replace('-ar.html', '.html').replace('/index.html','/');
-            // default to root
-            return '/';
+            if (p.startsWith('/ar/')) return p.replace(/^\/ar\//, '/');
+            if (p === '/ar' || p === '/ar/') return '/';
+            if (p.endsWith('-ar.html')) return '/' + p.split('/').pop().replace('-ar.html', '.html');
+            return p;
         }
 
-        return path;
+        return p;
     }
 
     function handleLinkClick(e) {
@@ -65,13 +66,11 @@
         const pref = getCookie(COOKIE_NAME);
         if (!pref) return;
         const path = window.location.pathname;
-        // If preference is arabic and we're not on an arabic page, redirect
-        if (pref === 'ar' && !path.includes('-ar.html')) {
+        if (pref === 'ar' && !path.startsWith('/ar/')) {
             const dest = computeAlternate(path, 'ar');
             if (dest !== path) window.location.href = dest;
         }
-        // If preference is en and we're on an arabic page, redirect to en
-        if (pref === 'en' && path.includes('-ar.html')) {
+        if (pref === 'en' && path.startsWith('/ar/')) {
             const dest = computeAlternate(path, 'en');
             if (dest !== path) window.location.href = dest;
         }

@@ -1,4 +1,4 @@
-// Frontend Configuration for Rainy
+// Frontend Configuration for Saudi Weather
 // All settings are documented for clarity and maintainability
 const config = {
     // API Base URL - always relative to current origin
@@ -6,10 +6,10 @@ const config = {
 
     // Default location (used if geolocation fails)
     defaultLocation: {
-        lat: 40.7128,
-        lon: -74.0060,
-        city: 'New York',
-        country: 'United States',
+        lat: 24.7136,
+        lon: 46.6753,
+        city: 'Riyadh',
+        country: 'Saudi Arabia',
     },
 
     // Search settings
@@ -38,5 +38,5 @@ const config = {
 window.appConfig = config;
 // Debug logging only when explicitly enabled in config
 if (config.debug) {
-    console.log('🌦️ Rainy Config:', config);
+    console.log('🌦️ Saudi Weather Config:', config);
 }

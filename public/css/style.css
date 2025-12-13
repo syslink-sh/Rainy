@@ -703,122 +703,6 @@ main {
 .daily-item .max { font-weight: 600; margin-right: 0.5rem; }
 .daily-item .min { color: var(--text-secondary); }
 
-.radar-container {
-    width: 100%;
-    max-width: 800px;
-    margin-top: 2rem;
-    padding: 0 1rem;
-}
-
-.radar-container h3 {
-    margin: 0 0 1rem 0;
-    color: var(--text-primary);
-    font-size: 1.2rem;
-    text-align: left;
-    padding-left: 0.5rem;
-}
-
-#radar-map {
-    width: 100%;
-    height: 100%;
-    border-radius: 0;
-    background: var(--card-bg);
-    border: none;
-    box-shadow: none;
-    z-index: 1;
-}
-
-.map-wrapper {
-    position: relative;
-    width: 100%;
-    height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--card-shadow);
-    border: 1px solid var(--card-border);
-}
-
-.map-loader {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    opacity: 0;
-}
-
-.map-loader.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.map-loader p {
-    margin-top: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    text-shadow: 0 2px 4px rgba(255,255,255,0.5);
-}
-
-.spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: var(--text-primary);
-    animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Leaflet Control Styling */
-.leaflet-control-zoom, .leaflet-control-layers {
-    border: none !important;
-    box-shadow: var(--card-shadow) !important;
-    border-radius: 10px !important;
-    overflow: hidden;
-}
-
-.leaflet-control-zoom a, .leaflet-control-layers {
-    background: #ffffff !important;
-    color: var(--text-primary) !important;
-}
-
-.leaflet-control-zoom a:hover, .leaflet-control-layers:hover {
-    background: rgba(255, 255, 255, 0.95) !important;
-}
-
-.leaflet-bar a {
-    border-bottom: 1px solid rgba(0,0,0,0.1) !important;
-}
-
-.weather-hover-popup .leaflet-popup-content-wrapper {
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    padding: 0;
-    color: #334155;
-}
-
-.weather-hover-popup .leaflet-popup-tip {
-    background: #ffffff;
-}
-
-.map-hover-content {
-    text-align: center;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
 .app-footer {
         text-align: center;
         padding: 1.5rem 0 0.5rem;
@@ -1012,10 +896,6 @@ main {
     .forecast-container {
         max-width: 100%;
     }
-    
-    .radar-container {
-        max-width: 100%;
-    }
 }
 
 /* Tablets */
@@ -1087,14 +967,6 @@ main {
     
     .forecast-container {
         padding: 0;
-    }
-    
-    .radar-container {
-        padding: 0;
-    }
-    
-    .map-wrapper {
-        height: 300px;
     }
 }
 
@@ -1238,16 +1110,6 @@ main {
     .daily-item .temps {
         width: 80px;
         font-size: 0.9rem;
-    }
-    
-    .map-wrapper {
-        height: 250px;
-        border-radius: 10px;
-    }
-    
-    .radar-container h3 {
-        font-size: 1rem;
-        padding-left: 0.25rem;
     }
     
     .error-toast {
@@ -1394,10 +1256,6 @@ main {
     .daily-forecast {
         flex: 1;
     }
-    
-    .map-wrapper {
-        height: 200px;
-    }
 }
 
 /* PWA standalone mode adjustments */
@@ -1466,7 +1324,6 @@ main {
 @media print {
     .weather-bg,
     .search-container,
-    .radar-container,
     .app-footer,
     .global-loader {
         display: none !important;

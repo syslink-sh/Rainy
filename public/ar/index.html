@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="description" content="Rainy">
+    <meta name="description" content="طقس السعودية">
     <meta name="author" content="SySLink">
     <meta name="theme-color" content="#4facfe">
-    <title>Rainy — الطقس</title>
+    <title>طقس السعودية</title>
     <link rel="manifest" href="/manifest.json">
-    <link rel="preload" href="css/style.css" as="style">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="preload" href="/css/style.css" as="style">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
@@ -31,14 +30,14 @@
     <div class="app-container">
         <header>
             <div class="header-left">
-                <a href="/index-ar.html" class="logo-link">
+                <a href="/ar/" class="logo-link">
                         <span class="logo-icon" aria-hidden="true">🌦️</span>
-                        <span class="logo-text">Rainy</span>
+                        <span class="logo-text">طقس السعودية</span>
                 </a>
                 <div class="search-container">
                     <div class="search-bar">
                             <input type="text" id="search-input" placeholder="ابحث عن مدينة" autocomplete="off" aria-label="ابحث عن مدينة">
-                            <button id="search-btn" aria-label="Search"><i class="fas fa-search" aria-hidden="true"></i></button>
+                            <button id="search-btn" aria-label="ابحث"><i class="fas fa-search" aria-hidden="true"></i></button>
                     </div>
                     <div id="search-results" class="search-results"></div>
                 </div>
@@ -112,17 +111,6 @@
                 </div>
             </div>
 
-            <div class="radar-container">
-                    <h3 id="weather-radar-title">رادار المطر</h3>
-                <div class="map-wrapper">
-                    <div id="radar-map"></div>
-                    <div id="map-loader" class="map-loader">
-                        <div class="spinner"></div>
-                            <p aria-live="polite">جاري تحميل بيانات الرادار...</p>
-                    </div>
-                </div>
-            </div>
-
             <div class="forecast-container">
                 <div class="hourly-forecast">
                         <h3 id="hourly-forecast-title">توقع الساعة</h3>
@@ -140,60 +128,24 @@
             </div>
         </main>
 
-        <!-- calendar moved into details grid -->
-
         <div class="error-toast" id="error-toast"></div>
 
         <footer class="app-footer">
-            <p><a href="/privacy.html" target="_blank" rel="noopener noreferrer">سياسة الخصوصية</a> — <span class="lang-switch"><a href="/" class="lang-link" data-lang="en">EN</a> | <a href="/index-ar.html" class="lang-link" data-lang="ar">AR</a></span></p>
+            <p><a href="/ar/privacy.html" target="_blank" rel="noopener noreferrer">سياسة الخصوصية</a> — <span class="lang-switch"><a href="/" class="lang-link" data-lang="en">EN</a> | <a href="/ar/" class="lang-link" data-lang="ar">AR</a></span></p>
         </footer>
         </div>
-        <script src="js/i18n.js" defer></script>
+        <script src="/js/i18n.js" defer></script>
     </div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    <script src="js/config.js"></script>
-    <script src="js/main.js" defer></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/main.js?v=10" defer></script>
     
     <!-- Service Worker Registration -->
     <script>
-        // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                        if (window.appConfig?.debug) console.log('🌦️ Service Worker registered:', registration.scope);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // New content available, show update notification
-                                    if (window.appConfig?.debug) console.log('🌦️ New version available! Refresh to update.');
-                                }
-                            });
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('🌦️ Service Worker registration failed:', error);
-                    });
+                navigator.serviceWorker.register('/sw.js').catch(()=>{});
             });
         }
-
-        // Handle PWA install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            // You can show a custom install button here if desired
-            if (window.appConfig?.debug) console.log('🌦️ PWA install prompt ready');
-        });
-
-        // Track successful installation
-        window.addEventListener('appinstalled', () => {
-            if (window.appConfig?.debug) console.log('🌦️ Rainy has been installed!');
-            deferredPrompt = null;
-        });
     </script>
 </body>
 </html>

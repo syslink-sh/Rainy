@@ -601,16 +601,14 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Calendar: load season and render current month's value under the season */
     const loadCalendar = async () => {
         try {
-            const resp = await fetch('/assets/calendar.json');
+            const apiBase = window.appConfig?.apiBaseUrl || '/api';
+            const resp = await fetch(`${apiBase}/calendar`);
             if (!resp.ok) return;
             const data = await resp.json();
 
-            if (!data || !data.months) return;
+            if (!data || !data.currentEntry) return;
 
-            const today = new Date();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-
-            const entry = data.months[mm];
+            const entry = data.currentEntry;
             const seasonEl = document.getElementById('cal-season-wide');
             if (!seasonEl) return;
 

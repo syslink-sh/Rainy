@@ -67,6 +67,29 @@ const to = ms => new Promise(resolve => setTimeout(resolve, ms));
                     wreq.end();
                 });
 
+                // Calendar test
+                await new Promise((resolve, reject) => {
+                    const calOpts = { hostname: HOST, port: PORT, path: '/api/calendar', method: 'GET' };
+                    const creq = http.request(calOpts, cres => {
+                        let b = '';
+                        cres.on('data', c => b += c);
+                        cres.on('end', () => {
+                            try {
+                                assert.strictEqual(cres.statusCode, 200, `Calendar status ${cres.statusCode}`);
+                                const cdata = JSON.parse(b);
+                                assert.ok(cdata && typeof cdata.currentMonth !== 'undefined', 'Missing currentMonth');
+                                assert.ok(cdata.currentEntry, 'Missing currentEntry');
+                                const hasSeason = (cdata.currentEntry.en && cdata.currentEntry.en.season) || cdata.currentEntry.Season_EN || cdata.currentEntry['الفصل (حسب الزعاق)'];
+                                assert.ok(hasSeason, 'Missing season name in entry (en.season | Season_EN | Arabic key)');
+                                console.log('Calendar endpoint passed');
+                                resolve();
+                            } catch (err) { reject(err); }
+                        });
+                    });
+                    creq.on('error', reject);
+                    creq.end();
+                });
+
                 console.log('All checks passed');
                 process.exit(0);
 

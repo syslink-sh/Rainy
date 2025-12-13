@@ -370,3 +370,43 @@ exports.getReverseGeocode = async (req, res) => {
         res.json({ name: 'Unknown Location', country: '', countryCode: '' });
     }
 };
+// Calendar API: returns months mapping and current month entry
+exports.getCalendar = async (req, res) => {
+    try {
+        const cacheKey = 'calendar:v1';
+        const cached = await getCached(cacheKey);
+        if (cached) return res.json(cached);
+
+        const filePath = path.join(process.cwd(), 'public', 'assets', 'calendar.json');
+        const contents = await fs.promises.readFile(filePath, 'utf8');
+        const data = JSON.parse(contents || '{}');
+
+        const months = data.months || {};
+
+        // Determine month - either from query month parameter (01..12) or server current month
+        let monthParam = req.query.month;
+        if (monthParam) {
+            monthParam = String(monthParam).padStart(2, '0');
+            if (!/^(0[1-9]|1[0-2])$/.test(monthParam)) {
+                return res.status(400).json({ error: 'Invalid month parameter' });
+            }
+        } else {
+            const now = new Date();
+            monthParam = String(now.getMonth() + 1).padStart(2, '0');
+        }
+
+        const currentEntry = months[monthParam] || null;
+
+        const result = {
+            months,
+            currentMonth: monthParam,
+            currentEntry,
+        };
+
+        await setCached(cacheKey, result, config.cache.geocode || 86400);
+        return res.json(result);
+    } catch (error) {
+        if (config.debug) console.error('[Calendar API Error]', error.message);
+        return res.status(500).json({ error: 'Failed to load calendar' });
+    }
+};

@@ -14,6 +14,9 @@ router.get('/search', apiController.searchLocation);
 // Reverse geocoding
 router.get('/reverse-geocode', apiController.getReverseGeocode);
 
+// Calendar endpoint
+router.get('/calendar', apiController.getCalendar);
+
 // 404 handler for unknown API routes
 router.use((req, res) => {
     res.status(404).json({ 

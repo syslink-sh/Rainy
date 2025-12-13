@@ -5,12 +5,19 @@ const config = require('../config');
 const { createClient } = require('redis');
 const Cache = new Map();
 let redisClient = null;
-try {
-    redisClient = createClient({ url: process.env.REDIS_URL || 'redis://127.0.0.1:6379' });
-    redisClient.connect().catch((err) => { redisClient = null; });
-} catch (e) {
-    redisClient = null;
-}
+(async () => {
+    const redisUrl = process.env.REDIS_URL;
+    if (!redisUrl) return; // no redis configured
+    try {
+        redisClient = createClient({ url: redisUrl });
+        redisClient.on('error', (err) => { if (config.debug) console.warn('[Redis] Error', err); });
+        await redisClient.connect();
+        if (config.debug) console.log('[Redis] Connected');
+    } catch (e) {
+        if (config.debug) console.warn('[Redis] Connection failed, falling back to in-memory cache', e.message || e);
+        redisClient = null;
+    }
+})();
 
 async function getCached(key) {
     if (redisClient && redisClient.isOpen) {
@@ -78,8 +85,9 @@ const WEATHER_CODES = {
 const http = axios.create({
     timeout: 10000,
     headers: {
-        // include contact info per Nominatim/Open data providers' recommendations
-        'User-Agent': 'SaudiWeatherApp/1.0 (me@syslink.dev)'
+        // generic UA; avoid including personal emails or secrets
+        'User-Agent': process.env.HTTP_USER_AGENT || 'SaudiWeather/1.0',
+        'Accept': 'application/json, text/plain, */*'
     },
 });
 
@@ -165,8 +173,8 @@ exports.getWeather = async (req, res) => {
         const params = {
             latitude: coords.latitude,
             longitude: coords.longitude,
-            hourly: 'temperature_2m,relativehumidity_2m,pressure_msl,visibility,precipitation,precipitation_probability,weathercode',
-            daily: 'weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset',
+            hourly: 'temperature_2m,weathercode',
+            daily: 'weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset',
             timezone: 'auto',
             forecast_days: 7,
             current_weather: true,
@@ -202,32 +210,21 @@ exports.getWeather = async (req, res) => {
             timezone: data.timezone,
             main: {
                 temp: (typeof current.temperature !== 'undefined') ? Math.round(current.temperature * 10) / 10 : getHourlyValue(hourly.temperature_2m, idx, { round: '1d' }),
-                humidity: getHourlyValue(hourly.relativehumidity_2m, idx, { defaultValue: null }),
-                feels_like: null,
-                pressure: getHourlyValue(hourly.pressure_msl, idx, { round: 'int' }),
             },
             weather: [{
                 description: weatherDescription,
                 code: current.weathercode || (hourly.weathercode && hourly.weathercode[idx]) || null,
             }],
-            wind: {
-                speed: typeof current.windspeed !== 'undefined' ? Math.round(current.windspeed * 10) / 10 : null,
-                direction: typeof current.winddirection !== 'undefined' ? current.winddirection : null,
-            },
-            visibility: getHourlyValue(hourly.visibility, idx, { defaultValue: null }),
-            precipitation: getHourlyValue(hourly.precipitation, idx, { defaultValue: null }),
             hourly: {
                 time: hourly.time ? hourly.time.slice(0, 24) : [],
                 temperature_2m: hourly.temperature_2m ? hourly.temperature_2m.slice(0, 24) : [],
                 weather_code: hourly.weathercode ? hourly.weathercode.slice(0, 24) : [],
-                precipitation_probability: hourly.precipitation_probability ? hourly.precipitation_probability.slice(0, 24) : [],
             },
             daily: {
                 time: daily.time || [],
                 weather_code: daily.weathercode || [],
                 temperature_2m_max: daily.temperature_2m_max || [],
                 temperature_2m_min: daily.temperature_2m_min || [],
-                precipitation_sum: daily.precipitation_sum || [],
                 sunrise: daily.sunrise || [],
                 sunset: daily.sunset || [],
             },
@@ -237,7 +234,7 @@ exports.getWeather = async (req, res) => {
         res.json(mappedData);
 
     } catch (error) {
-        console.error('[Weather Error]', error.message);
+        if (config.debug) console.error('[Weather Error]', error.message);
 
         if (error.response) {
             return res.status(error.response.status).json({
@@ -257,17 +254,21 @@ exports.getWeather = async (req, res) => {
 /**
  * Search for locations by name
  */
-// Preload the Saudi cities dataset once on module init for performance
+// Preload the Saudi cities dataset once on module init for performance (async load)
 const fs = require('fs');
 const path = require('path');
 let SAUDI_CITIES = [];
-try {
-    const citiesPath = path.join(process.cwd(), 'public', 'assets', 'saudi_cities.json');
-    const citiesData = fs.readFileSync(citiesPath, 'utf8');
-    SAUDI_CITIES = JSON.parse(citiesData);
-} catch (e) {
-    // keeping SAUDI_CITIES empty - search endpoint will respond gracefully
-}
+(async () => {
+    try {
+        const citiesPath = path.join(process.cwd(), 'public', 'assets', 'saudi_cities.json');
+        const citiesData = await fs.promises.readFile(citiesPath, 'utf8');
+        SAUDI_CITIES = JSON.parse(citiesData);
+        if (config.debug) console.log('[Cities] Loaded', SAUDI_CITIES.length, 'cities');
+    } catch (e) {
+        if (config.debug) console.warn('[Cities] Could not load cities list', e.message || e);
+        SAUDI_CITIES = [];
+    }
+})();
 
 // Normalize string (strip diacritics, lowercase)
 const normalize = (s) => {
@@ -311,7 +312,7 @@ exports.searchLocation = async (req, res) => {
         res.json(locations);
 
     } catch (error) {
-        console.error('[Search Error]', error.message);
+        if (config.debug) console.error('[Search Error]', error.message);
         res.status(500).json({ error: 'Failed to search locations' });
     }
 };
@@ -364,7 +365,7 @@ exports.getReverseGeocode = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Geocode Error]', error.message);
+        if (config.debug) console.error('[Geocode Error]', error.message);
         // Return fallback instead of error for better UX; still return 200 with generic value
         res.json({ name: 'Unknown Location', country: '', countryCode: '' });
     }

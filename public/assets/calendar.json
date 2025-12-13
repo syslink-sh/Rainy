@@ -1,52 +1,100 @@
 {
-  "seasons": {
-    "spring": "March 21 - June 20",
-    "summer": "June 21 - September 20",
-    "autumn": "September 21 - December 20",
-    "winter": "December 21 - March 20"
-  },
-  "season_names": {
-    "en": {
-      "spring": "Spring",
-      "summer": "Summer",
-      "autumn": "Autumn",
-      "winter": "Winter"
+  "months": {
+    "01": {
+      "الشهر الميلادي": "يناير",
+      "الفصل (حسب الزعاق)": "الشتاء",
+      "الموسم المحلي والوصف المختصر": "الشبط: ذروة البرد وبطنه.",
+      "Month_EN": "January",
+      "Season_EN": "Winter",
+      "SeasonDescription_EN": "Al-Shabat: The peak and core of the cold weather."
     },
-    "ar": {
-      "spring": "الربيع",
-      "summer": "الصيف",
-      "autumn": "الخريف",
-      "winter": "الشتاء"
-    }
-  },
-  "weather_month": {
-    "en": {
-      "01": "Peak cold",
-      "02": "End of cold",
-      "03": "Warming begins",
-      "04": "Mild and fresh",
-      "05": "Heat begins",
-      "06": "Extreme heat",
-      "07": "Peak heat",
-      "08": "Heat eases",
-      "09": "End of summer",
-      "10": "Pleasant",
-      "11": "Mild and cool",
-      "12": "Cold begins"
+    "02": {
+      "الشهر الميلادي": "فبراير",
+      "الفصل (حسب الزعاق)": "الشتاء",
+      "الموسم المحلي والوصف المختصر": "العقارب: آخر موجات البرد القارس.",
+      "Month_EN": "February",
+      "Season_EN": "Winter",
+      "SeasonDescription_EN": "Al-Aqarib (The Scorpions): The last waves of severe cold."
     },
-    "ar": {
-      "01": "قمة البرد",
-      "02": "نهاية البرد",
-      "03": "بداية الاحترار",
-      "04": "معتدل ومنعش",
-      "05": "بداية الحرارة",
-      "06": "حرارة شديدة",
-      "07": "ذروة الحرارة",
-      "08": "انحسار الحرارة",
-      "09": "نهاية الصيف",
-      "10": "معتدل",
-      "11": "معتدل وبارد",
-      "12": "بداية البرد"
+    "03": {
+      "الشهر الميلادي": "مارس",
+      "الفصل (حسب الزعاق)": "الربيع",
+      "الموسم المحلي والوصف المختصر": "بداية الدفء: اعتدال الأجواء ونمو النبات.",
+      "Month_EN": "March",
+      "Season_EN": "Spring",
+      "SeasonDescription_EN": "Beginning of warmth: Moderate weather and plant growth."
+    },
+    "04": {
+      "الشهر الميلادي": "أبريل",
+      "الفصل (حسب الزعاق)": "الربيع",
+      "الموسم المحلي والوصف المختصر": "استمرار الاعتدال: أجواء لطيفة وظهور السحب الرعدية.",
+      "Month_EN": "April",
+      "Season_EN": "Spring",
+      "SeasonDescription_EN": "Continued moderation: Pleasant weather and appearance of thunderclouds."
+    },
+    "05": {
+      "الشهر الميلادي": "مايو",
+      "الفصل (حسب الزعاق)": "الصيف",
+      "الموسم المحلي والوصف المختصر": "بداية الحر: ارتفاع تدريجي للحرارة.",
+      "Month_EN": "May",
+      "Season_EN": "Summer",
+      "SeasonDescription_EN": "Beginning of heat: Gradual rise in temperature."
+    },
+    "06": {
+      "الشهر الميلادي": "يونيو",
+      "الفصل (حسب الزعاق)": "الصيف",
+      "الموسم المحلي والوصف المختصر": "مربعانية القيظ: بداية الحر الشديد.",
+      "Month_EN": "June",
+      "Season_EN": "Summer",
+      "SeasonDescription_EN": "Marbaaniyat Al-Qaydh: The beginning of intense heat."
+    },
+    "07": {
+      "الشهر الميلادي": "يوليو",
+      "الفصل (حسب الزعاق)": "الصيف",
+      "الموسم المحلي والوصف المختصر": "جمرة القيظ: أشد أيام السنة حرارة.",
+      "Month_EN": "July",
+      "Season_EN": "Summer",
+      "SeasonDescription_EN": "Jamrat Al-Qaydh (Ember of the Heat): The hottest days of the year."
+    },
+    "08": {
+      "الشهر الميلادي": "أغسطس",
+      "الفصل (حسب الزعاق)": "الصيف",
+      "الموسم المحلي والوصف المختصر": "سهيل: انكسار تدريجي للحرارة (يبدأ أواخر الشهر).",
+      "Month_EN": "August",
+      "Season_EN": "Summer",
+      "SeasonDescription_EN": "Suhail (Canopus star): Gradual break in heat (starts late in the month)."
+    },
+    "09": {
+      "الشهر الميلادي": "سبتمبر",
+      "الفصل (حسب الزعاق)": "الصيف",
+      "الموسم المحلي والوصف المختصر": "نهاية الصيف: تحسن كبير في الأجواء.",
+      "Month_EN": "September",
+      "Season_EN": "Summer",
+      "SeasonDescription_EN": "End of summer: Significant improvement in weather."
+    },
+    "10": {
+      "الشهر الميلادي": "أكتوبر",
+      "الفصل (حسب الزعاق)": "الخريف",
+      "الموسم المحلي والوصف المختصر": "الوسم: ألطف المواسم وموسم أمطار الربيع.",
+      "Month_EN": "October",
+      "Season_EN": "Autumn",
+      "SeasonDescription_EN": "Al-Wasm: The mildest season and the season for spring rains."
+    },
+    "11": {
+      "الشهر الميلادي": "نوفمبر",
+      "الفصل (حسب الزعاق)": "الخريف",
+      "الموسم المحلي والوصف المختصر": "اعتدال وبرودة: أجواء لطيفة وبوادر برد ليلي.",
+      "Month_EN": "November",
+      "Season_EN": "Autumn",
+      "SeasonDescription_EN": "Moderation and coolness: Pleasant weather and signs of nighttime cold."
+    },
+    "12": {
+      "الشهر الميلادي": "ديسمبر",
+      "الفصل (حسب الزعاق)": "الشتاء",
+      "الموسم المحلي والوصف المختصر": "المربعانية: بداية البرد الفعلي والصقيع.",
+      "Month_EN": "December",
+      "Season_EN": "Winter",
+      "SeasonDescription_EN": "Al-Marbaaniyah: The beginning of the actual cold and frost."
     }
   }
 }

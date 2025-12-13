@@ -1,0 +1,164 @@
+Saudi Weather — API Documentation
+
+Base URL
+- All API routes are mounted under the `/api` path. Example base: `http://<host>:<port>/api`
+
+General Notes
+- No authentication required.
+- Rate limiting: Default is 100 requests per 15 minutes (see `config.rateLimit`).
+- CORS: Requests are allowed from configured origins (see `server/config.js` `cors.allowedOrigins`).
+- Cache: Weather responses use server caching (Redis if available, otherwise in-memory). Cache TTLs from `server/config.js`:
+  - weather: 300 seconds (5 minutes)
+  - search: 3600 seconds (1 hour) — (NOTE: search uses a local preloaded dataset, not an active cache in controller)
+  - geocode: 86400 seconds (24 hours)
+- The server enforces a CSP and other headers; clients should only rely on the JSON API behavior.
+
+API Endpoints
+- GET /health
+  - Purpose: Basic service health check
+  - Query Parameters: none
+  - Response: 200 OK
+    - JSON example:
+      {
+        "status": "OK",
+        "timestamp": "2025-12-13T12:34:56.789Z",
+        "uptime": 1234,
+        "environment": "development"
+      }
+
+- GET /weather
+  - Purpose: Return current weather + hourly/daily forecast for a coordinate within Saudi Arabia
+  - Method: GET
+  - Path: `/api/weather`
+  - Query Parameters (required):
+    - `lat`: latitude (numeric) — required
+    - `lon`: longitude (numeric) — required
+  - Validation rules:
+    - Coordinates must be valid floats; latitude ∈ [-90,90], longitude ∈ [-180,180].
+    - Must be within Saudi Arabia bounds: latitude ∈ [16,32], longitude ∈ [34,56]. If outside, returns 400 with JSON error.
+  - Behavior:
+    - Rounds coordinates to 4 decimal places for cache key: `weather:<latNorm>:<lonNorm>`.
+    - Uses Open-Meteo API to fetch `current_weather`, `hourly`, and `daily` fields.
+    - Returns a simplified, normalized JSON object.
+  - Cache:
+    - Weather responses are cached on the server for `config.cache.weather` (default 300s).
+  - Response: 200 OK, JSON
+    - Fields (summary):
+      - `name`: string (usually "Current Location")
+      - `dt`: timestamp string for the data/time returned
+      - `is_day`: 0/1 or boolean (if available)
+      - `timezone`: timezone string
+      - `main`: object
+        - `temp`: temperature in Celsius (rounded to 1 decimal)
+      - `weather`: array of objects: `{ description, code }` — description is a friendly string from `WEATHER_CODES`, code is the Open-Meteo weather code
+      - `hourly`: object with arrays for the next 24 hours
+        - `time`, `temperature_2m`, `weather_code` arrays (0..23)
+      - `daily`: object with arrays for daily forecasts (7-day)
+        - `time`, `weather_code`, `temperature_2m_max`, `temperature_2m_min`, `sunrise`, `sunset`
+    - Example:
+      {
+        "name": "Current Location",
+        "dt": "2025-12-13T10:00:00Z",
+        "is_day": 1,
+        "timezone": "Asia/Riyadh",
+        "main": { "temp": 24.5 },
+        "weather": [{ "description": "Clear sky", "code": 0 }],
+        "hourly": { "time": [ ... ], "temperature_2m": [ ... ], "weather_code": [ ... ] },
+        "daily": { "time": [ ... ], "weather_code": [ ... ], "temperature_2m_max": [ ... ], "temperature_2m_min": [ ... ], "sunrise": [ ... ], "sunset": [ ... ] }
+      }
+  - Errors:
+    - 400 Bad Request
+      - Missing `lat` or `lon`: { "error": "Latitude and longitude are required" }
+      - Invalid coordinates: { "error": "Invalid coordinates" } or more specific messages
+      - Outside Saudi Arabia bounds: { "error": "Weather data is only available for locations within Saudi Arabia" }
+    - 504 Weather service timeout: { "error": "Weather service timeout" }
+    - 5xx When upstream API fails: returns the upstream error if available or { "error": "Failed to fetch weather data" }
+
+  - Examples (GET):
+    - Riyadh: `/api/weather?lat=24.7136&lon=46.6753`
+    - Jeddah: `/api/weather?lat=21.5433&lon=39.1728`
+
+- GET /search
+  - Purpose: Search Saudi cities dataset by name (English or Arabic)
+  - Method: GET
+  - Path: `/api/search`
+  - Query Parameters (required):
+    - `q`: search string (required) — must be at least 2 characters, maximum 64.
+  - Behavior:
+    - The server loads `public/assets/saudi_cities.json` at startup and filters entries using a normalized (diacritics/uppercase excluded) search.
+    - Results are sliced to a maximum of 10 entries.
+  - Response: 200 OK with JSON array of location objects (0..10):
+    - Each object:
+      - `name`: English name (name_en)
+      - `lat`: latitude (float)
+      - `lon`: longitude (float)
+      - `country`: "Saudi Arabia"
+      - `region`: (empty string) — region field not populated
+      - `arabic`: Arabic name (name_ar)
+    - Example:
+      [
+        { "name": "Riyadh", "lat": 24.69999996, "lon": 46.73333003, "country": "Saudi Arabia", "region": "", "arabic": "الرياض" }
+      ]
+  - Errors:
+    - 400 Bad Request: if `q` is missing, too short, or too long — returns JSON { "error": "Search query must be at least 2 characters" } or similar
+    - 500 Server Error on failure to process request
+  - Example (GET): `/api/search?q=Riyadh`
+
+- GET /reverse-geocode
+  - Purpose: Reverse-Geocode coordinates to a human-readable name (uses Nominatim)
+  - Method: GET
+  - Path: `/api/reverse-geocode`
+  - Query Parameters (required):
+    - `lat`: latitude (numeric) — required
+    - `lon`: longitude (numeric) — required
+  - Behavior:
+    - Validates coordinates with same rules as `/weather`.
+    - Calls Nominatim `/reverse` endpoint with `format=json`, `zoom=10`, `addressdetails=1`.
+    - Returns a simplified object describing the detected city/town/village and country.
+    - On error, returns a safe fallback JSON `{ name: 'Unknown Location', country: '', countryCode: '' }` with a 200 OK (the controller intentionally wraps errors to favor user experience).
+  - Response: 200 OK
+    - Example:
+      {
+        "name": "Riyadh",
+        "country": "Kingdom of Saudi Arabia",
+        "countryCode": "SA",
+        "displayName": "Riyadh, Riyadh Province, Saudi Arabia"
+      }
+  - Errors:
+    - 400 Bad Request: missing or invalid coordinates (similar to `/weather`)
+    - NOTE: On upstream Nominatim errors the controller returns a 200 fallback with "Unknown Location" instead of a 5xx.
+
+- Unknown API endpoints
+  - Any other `/api/*` endpoints return 404 with JSON:
+    {
+      "error": "Not Found",
+      "message": "API endpoint <METHOD> <URL> does not exist"
+    }
+
+Developer Notes
+- Hosting: App serves static files from `/public` and all APIs under `/api`.
+- Rate limits: The server uses `express-rate-limit` to limit requests; adjust `config.rateLimit` to change behavior.
+- Caching: The weather data response is cached on the server to reduce load on upstream APIs. When Redis is available (set `REDIS_URL`), Redis will be used; otherwise a simple in-memory Map is used.
+- Search dataset: The `search` endpoint uses `public/assets/saudi_cities.json`. If you need updated city data, modify or replace that JSON file and deploy. It is preloaded on server start.
+- External APIs used:
+  - Open-Meteo (forecast) via `config.apis.openMeteo`.
+  - Nominatim (OpenStreetMap) for reverse geocoding via `config.apis.nominatim`.
+  - The server sends a `User-Agent` header on outgoing HTTP requests identifying the app.
+
+Examples / Quick curl
+- Health:
+  curl -s "http://localhost:3005/api/health"
+
+- Weather:
+  curl -s "http://localhost:3005/api/weather?lat=24.7136&lon=46.6753"
+
+- Search:
+  curl -s "http://localhost:3005/api/search?q=Riyadh"
+
+- Reverse geocode:
+  curl -s "http://localhost:3005/api/reverse-geocode?lat=24.7136&lon=46.6753"
+
+Contact / Attribution
+- The server uses Open-Meteo and Nominatim. Please review their terms when using the data.
+
+End of API Documentation

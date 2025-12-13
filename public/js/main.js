@@ -4,15 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const locale = userLang.startsWith('ar') ? 'ar-EG' : 'en-US';
     const isArabic = userLang.startsWith('ar');
 
-    // Localized unit labels
-    const units = {
-        wind: isArabic ? 'كم/س' : 'km/h',
-        humidity: '%',
-        feelsLike: isArabic ? '°' : '°',
-        pressure: isArabic ? 'هكتوباسكال' : 'hPa',
-        visibility: isArabic ? 'كم' : 'km',
-        precipitation: isArabic ? 'مم' : 'mm'
-    };
+
 
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
@@ -23,12 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateDisplayEl = document.getElementById('date-display');
     const tempEl = document.getElementById('temp');
     const descriptionEl = document.getElementById('description');
-    const windSpeedEl = document.getElementById('wind-speed');
-    const humidityEl = document.getElementById('humidity');
-    const feelsLikeEl = document.getElementById('feels-like');
-    const pressureEl = document.getElementById('pressure');
-    const visibilityEl = document.getElementById('visibility');
-    const precipitationEl = document.getElementById('precipitation');
     const weatherBg = document.getElementById('weather-bg');
     const errorToast = document.getElementById('error-toast');
     const globalLoader = document.getElementById('global-loader');
@@ -43,11 +29,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLon = null;
     let currentCityName = null;
 
+    // Global error handlers to capture unexpected runtime errors and promise rejections
+    window.addEventListener('error', (e) => {
+        console.error('[Global Error] ', e.message, e.filename, e.lineno, e.colno, e.error && e.error.stack);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+        console.error('[Unhandled Rejection]', e.reason, e.promise);
+    });
+
     // Basic DOM checks - if a few core elements are missing, stop further UI setup
     if (!searchInput || !cityNameEl || !tempEl || !descriptionEl || !iconContainer) {
         console.error('Essential UI elements are missing, aborting initialization');
         return;
     }
+
+    // Small helper to safely set textContent and log missing element locations
+    const safeSetText = (el, text, name = '') => {
+        if (!el) {
+            console.warn('[Saudi Weather] Missing element for setText', name || '(unknown)', '\n', new Error().stack);
+            return;
+        }
+        try { el.textContent = text; } catch (e) { console.warn('[Saudi Weather] Failed to set textContent for', name || '(unknown)', e); }
+    };
 
     // Register for periodic sync and setup online/offline handlers
     // Improves offline experience and keeps weather data fresh
@@ -143,12 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 div.className = 'hourly-item';
                 const timeSpan = document.createElement('span');
                 timeSpan.className = 'time';
-                timeSpan.textContent = `${hour}:00`;
+                safeSetText(timeSpan, `${hour}:00`, 'timeSpan');
                 const iconI = document.createElement('i');
                 iconI.className = `fas ${getWeatherIconClass(hourly.weather_code[index])} icon`;
                 const tempSpan = document.createElement('span');
                 tempSpan.className = 'temp';
-                tempSpan.textContent = Math.round(hourly.temperature_2m[index]);
+                safeSetText(tempSpan, Math.round(hourly.temperature_2m[index]), 'tempSpan');
                 div.appendChild(timeSpan);
                 div.appendChild(iconI);
                 div.appendChild(tempSpan);
@@ -172,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
             div.className = 'daily-item';
             const daySpan = document.createElement('span');
             daySpan.className = 'day';
-            daySpan.textContent = index === 0 ? todayLabel : dayName;
+            safeSetText(daySpan, index === 0 ? todayLabel : dayName, 'daySpan');
             const iconWrap = document.createElement('div');
             iconWrap.className = 'icon';
             const iconI = document.createElement('i');
@@ -182,10 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
             temps.className = 'temps';
             const max = document.createElement('span');
             max.className = 'max';
-            max.textContent = Math.round(daily.temperature_2m_max[index]);
+            safeSetText(max, Math.round(daily.temperature_2m_max[index]), 'maxTemp');
             const min = document.createElement('span');
             min.className = 'min';
-            min.textContent = Math.round(daily.temperature_2m_min[index]);
+            safeSetText(min, Math.round(daily.temperature_2m_min[index]), 'minTemp');
             temps.appendChild(max);
             temps.appendChild(min);
             div.appendChild(daySpan);
@@ -364,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateBackground = (description, timeStr) => {
-        weatherBg.className = 'weather-bg weather';
+        if (weatherBg) weatherBg.className = 'weather-bg weather';
         // Reset body classes
         document.body.classList.remove('rain', 'thunder', 'snow', 'cloudy', 'clear', 'midnight', 'morning', 'afternoon', 'night');
         
@@ -381,12 +384,12 @@ document.addEventListener('DOMContentLoaded', () => {
             weatherClass = 'cloudy';
         }
         
-        weatherBg.classList.add(weatherClass);
+        if (weatherBg) weatherBg.classList.add(weatherClass);
         document.body.classList.add(weatherClass);
 
         if (timeStr) {
             const timeClass = getTimeOfDay(timeStr);
-            weatherBg.classList.add(timeClass);
+            if (weatherBg) weatherBg.classList.add(timeClass);
             document.body.classList.add(timeClass);
         }
     };
@@ -413,8 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 timeZone: currentTimezone
             };
 
-            currentTimeEl.textContent = now.toLocaleTimeString(locale, timeOptions);
-            dateDisplayEl.textContent = now.toLocaleDateString(locale, dateOptions);
+            safeSetText(currentTimeEl, now.toLocaleTimeString(locale, timeOptions), 'currentTimeEl');
+            safeSetText(dateDisplayEl, now.toLocaleDateString(locale, dateOptions), 'dateDisplayEl');
         };
         
         updateTime();
@@ -431,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         weatherFetchController = new AbortController();
         const signal = weatherFetchController.signal;
-        if (!silent) {
+        if (!silent && globalLoader) {
             globalLoader.classList.remove('hidden');
         }
         
@@ -447,15 +450,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const data = await response.json();
             
-            cityNameEl.textContent = name || data.name;
-            tempEl.textContent = data.main.temp ? `${Math.round(data.main.temp)}` : '--';
-            descriptionEl.textContent = translateWeatherDescription(data.weather[0].description);
-            windSpeedEl.textContent = data.wind && data.wind.speed ? `${data.wind.speed} ${units.wind}` : `-- ${units.wind}`;
-            humidityEl.textContent = data.main.humidity ? `${data.main.humidity}${units.humidity}` : `--${units.humidity}`;
-            feelsLikeEl.textContent = data.main.feels_like ? `${Math.round(data.main.feels_like)}${units.feelsLike}` : `--${units.feelsLike}`;
-            pressureEl.textContent = data.main.pressure ? `${data.main.pressure} ${units.pressure}` : `-- ${units.pressure}`;
-            visibilityEl.textContent = data.visibility ? `${(data.visibility / 1000).toFixed(1)} ${units.visibility}` : `-- ${units.visibility}`;
-            precipitationEl.textContent = data.precipitation ? `${data.precipitation} ${units.precipitation}` : `-- ${units.precipitation}`;
+            safeSetText(cityNameEl, name || data.name, 'cityNameEl');
+            safeSetText(tempEl, data.main.temp ? `${Math.round(data.main.temp)}` : '--', 'tempEl');
+            safeSetText(descriptionEl, translateWeatherDescription(data.weather[0].description), 'descriptionEl');
             
             updateBackground(data.weather[0].description, data.dt);
             // Render icon using numeric weather code to ensure safe, predictable output
@@ -466,12 +463,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.hourly) renderHourlyForecast(data.hourly);
             if (data.daily) renderDailyForecast(data.daily);
 
-            searchResultsEl.style.display = 'none';
+            if (searchResultsEl) searchResultsEl.style.display = 'none';
 
         } catch (error) {
             if (error.name !== 'AbortError') showError(error.message);
         } finally {
-            if (!silent) {
+            if (!silent && globalLoader) {
                 setTimeout(() => {
                     globalLoader.classList.add('hidden');
                 }, 500);
@@ -485,8 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(searchTimeout);
         
         if (query.length < 2) {
-            searchResultsEl.style.display = 'none';
-            return;
+            if (searchResultsEl) searchResultsEl.style.display = 'none';
         }
 
             const debounceMs = window.appConfig?.searchDebounce || 150;
@@ -508,6 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderSearchResults = (locations) => {
+        if (!searchResultsEl) return;
         searchResultsEl.innerHTML = '';
         if (locations.length === 0) {
             searchResultsEl.style.display = 'none';
@@ -520,21 +517,21 @@ document.addEventListener('DOMContentLoaded', () => {
             div.className = 'search-result-item';
             const citySpan = document.createElement('span');
             citySpan.className = 'city';
-            citySpan.textContent = displayName;
+            safeSetText(citySpan, displayName, 'citySpan');
             const countrySpan = document.createElement('span');
             countrySpan.className = 'country';
-            countrySpan.textContent = `${loc.region ? loc.region + ', ' : ''}${loc.country}`;
+            safeSetText(countrySpan, `${loc.region ? loc.region + ', ' : ''}${loc.country}`, 'countrySpan');
             div.appendChild(citySpan);
             div.appendChild(countrySpan);
             div.addEventListener('click', () => {
                 searchInput.value = displayName;
-                countryNameEl.textContent = loc.country || '';
+                safeSetText(countryNameEl, loc.country || '', 'countryNameEl');
                 fetchWeather(loc.lat, loc.lon, loc.name);
             });
             searchResultsEl.appendChild(div);
         });
 
-        searchResultsEl.style.display = 'block';
+        if (searchResultsEl) searchResultsEl.style.display = 'block';
     };
 
     /**
@@ -542,7 +539,11 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string} msg - Message to display
      */
     const showError = (msg) => {
-        errorToast.textContent = msg;
+        if (!errorToast) {
+            console.error(msg);
+            return;
+        }
+        safeSetText(errorToast, msg, 'errorToast');
         errorToast.style.display = 'block';
         setTimeout(() => {
             errorToast.style.display = 'none';
@@ -564,7 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-container')) {
-            searchResultsEl.style.display = 'none';
+            if (searchResultsEl) searchResultsEl.style.display = 'none';
         }
     });
 
@@ -586,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     console.error("Reverse geocoding failed", e);
                 }
-                countryNameEl.textContent = countryName;
+                safeSetText(countryNameEl, countryName, 'countryNameEl');
                 fetchWeather(latitude, longitude, cityName);
             },
             (error) => {
@@ -604,90 +605,45 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!resp.ok) return;
             const data = await resp.json();
 
-            // data.seasons: { "Spring": "March 21 – June 20", ... }
-            // data.weather_month: { "January": "...", ... }
-            if (!data || !data.seasons) return;
-
-            const monthNameMap = {
-                january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
-                july: '07', august: '08', september: '09', october: '10', november: '11', december: '12'
-            };
-
-            const parseRange = (rangeStr) => {
-                // Accept formats like "March 21 – June 20" or "March 21 - June 20"
-                const parts = rangeStr.split(/–|-/).map(p => p.trim());
-                if (parts.length !== 2) return null;
-                const parseMD = (part) => {
-                    const [monthWord, dayStr] = part.split(/\s+/);
-                    if (!monthWord || !dayStr) return null;
-                    const month = monthNameMap[monthWord.toLowerCase()];
-                    const day = String(parseInt(dayStr, 10)).padStart(2, '0');
-                    return `${month}-${day}`;
-                };
-                const start = parseMD(parts[0]);
-                const end = parseMD(parts[1]);
-                if (!start || !end) return null;
-                return { start, end };
-            };
+            if (!data || !data.months) return;
 
             const today = new Date();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const md = `${mm}-${dd}`;
 
-            const inRange = (start, end, cur) => {
-                if (start <= end) {
-                    return cur >= start && cur <= end;
-                }
-                // Wrapped range, e.g., 12-21 -> 03-20
-                return cur >= start || cur <= end;
-            };
-
-            let currentSeasonKey = null;
-            let currentSeasonRange = null;
-            for (const [key, rangeStr] of Object.entries(data.seasons)) {
-                const parsed = parseRange(rangeStr);
-                if (!parsed) continue;
-                if (inRange(parsed.start, parsed.end, md)) {
-                    currentSeasonKey = key; // e.g., 'spring'
-                    currentSeasonRange = `${parsed.start} — ${parsed.end}`;
-                    break;
-                }
-            }
-
+            const entry = data.months[mm];
             const seasonEl = document.getElementById('cal-season-wide');
+            if (!seasonEl) return;
 
-                if (!seasonEl) return;
-
-                    if (currentSeasonKey) {
-                // Determine locale code for calendar names ('en' or 'ar')
-                const langCode = userLang.startsWith('ar') ? 'ar' : 'en';
-
-                // Get display name for season from calendar data
-                const seasonName = (data.season_names && data.season_names[langCode] && data.season_names[langCode][currentSeasonKey]) || currentSeasonKey;
-
-                // Get the current month's descriptive value from weather_month using numeric month
-                const monthNum = mm; // already padded '01'..'12'
-                const monthValue = (data.weather_month && data.weather_month[langCode] && data.weather_month[langCode][monthNum]) || '';
-
-                const content = document.createElement('div');
-                content.className = 'cal-season-content';
-                const h3 = document.createElement('h3');
-                h3.className = 'cal-season-name';
-                h3.textContent = seasonName;
-                const p = document.createElement('p');
-                p.className = 'cal-season-sub';
-                p.textContent = monthValue;
-                content.appendChild(h3);
-                content.appendChild(p);
-                seasonEl.innerHTML = '';
-                seasonEl.appendChild(content);
-                seasonEl.style.display = 'flex';
-
-                // seasonEl contains the visible season text; no separate cal-item elements present
-            } else {
+            if (!entry) {
                 seasonEl.style.display = 'none';
+                return;
             }
+
+            const langCode = userLang.startsWith('ar') ? 'ar' : 'en';
+
+            let seasonName = '';
+            let monthValue = '';
+            if (langCode === 'ar') {
+                seasonName = entry['الفصل (حسب الزعاق)'] || entry.Season_EN || '';
+                monthValue = entry['الموسم المحلي والوصف المختصر'] || entry.Season_EN || '';
+            } else {
+                seasonName = entry.Season_EN || entry['الفصل (حسب الزعاق)'] || '';
+                monthValue = entry.SeasonDescription_EN || entry.Season_EN || '';
+            }
+
+            const content = document.createElement('div');
+            content.className = 'cal-season-content';
+            const h3 = document.createElement('h3');
+            h3.className = 'cal-season-name';
+            safeSetText(h3, seasonName, 'cal-season-name');
+            const p = document.createElement('p');
+            p.className = 'cal-season-sub';
+            safeSetText(p, monthValue, 'cal-season-sub');
+            content.appendChild(h3);
+            content.appendChild(p);
+            seasonEl.innerHTML = '';
+            seasonEl.appendChild(content);
+            seasonEl.style.display = 'flex';
 
         } catch (e) {
             console.error('Calendar load failed', e);

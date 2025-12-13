@@ -5,6 +5,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const path = require('path');
 const morgan = require('morgan');
+const compression = require('compression');
 const config = require('./config');
 
 const app = express();
@@ -98,11 +99,20 @@ app.use((req, res, next) => {
     res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
     // Permissions policy - minimal set for web app
     res.setHeader('Permissions-Policy', 'geolocation=(self)');
+    // Anti-clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
+    // No caching for API routes
+    if (req.path.startsWith('/api/')) {
+        res.setHeader('Cache-Control', 'no-store');
+        res.setHeader('Pragma', 'no-cache');
+    }
+
     next();
 });
 
 app.use(cors(corsOptions));
 app.use(morgan(isProduction ? 'combined' : 'dev'));
+app.use(compression());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
@@ -158,6 +168,16 @@ app.use((err, req, res, next) => {
 process.on('SIGTERM', () => {
     log('SIGTERM received, shutting down gracefully...');
     process.exit(0);
+});
+
+// Global error handlers to avoid crashes and leak minimal info
+process.on('uncaughtException', (err) => {
+    errlog('[Uncaught Exception] ', err && err.stack ? err.stack : err);
+    // Exit after logging to allow a process manager to restart
+    process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+    errlog('[Unhandled Rejection] ', reason && reason.stack ? reason.stack : reason);
 });
 
 app.listen(PORT, () => {

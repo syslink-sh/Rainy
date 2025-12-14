@@ -1,107 +1,11 @@
-const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 const config = require('../config');
+const weatherService = require('../services/weatherService');
+const searchService = require('../services/searchService');
+const cacheService = require('../services/cacheService');
 
-// Cache helper: prefer Redis when available, fallback to in-memory Map
-const { createClient } = require('redis');
-const Cache = new Map();
-let redisClient = null;
-(async () => {
-    const redisUrl = process.env.REDIS_URL;
-    if (!redisUrl) return; // no redis configured
-    try {
-        redisClient = createClient({ url: redisUrl });
-        redisClient.on('error', (err) => { if (config.debug) console.warn('[Redis] Error', err); });
-        await redisClient.connect();
-        if (config.debug) console.log('[Redis] Connected');
-    } catch (e) {
-        if (config.debug) console.warn('[Redis] Connection failed, falling back to in-memory cache', e.message || e);
-        redisClient = null;
-    }
-})();
 
-async function getCached(key) {
-    if (redisClient && redisClient.isOpen) {
-        try {
-            const v = await redisClient.get(key);
-            if (v) return JSON.parse(v);
-        } catch (e) {
-            // fall through to in-memory
-        }
-    }
-    const rec = Cache.get(key);
-    if (!rec) return null;
-    if (Date.now() > rec.expires) {
-        Cache.delete(key);
-        return null;
-    }
-    return rec.value;
-}
-
-async function setCached(key, value, ttlSeconds) {
-    if (redisClient && redisClient.isOpen) {
-        try {
-            await redisClient.set(key, JSON.stringify(value), { EX: ttlSeconds });
-            return;
-        } catch (e) {
-            // fall back to memory
-        }
-    }
-    Cache.set(key, { value, expires: Date.now() + (ttlSeconds * 1000) });
-}
-
-// Weather code descriptions
-const WEATHER_CODES = {
-    0: 'Clear sky',
-    1: 'Mainly clear',
-    2: 'Partly cloudy',
-    3: 'Overcast',
-    45: 'Fog',
-    48: 'Depositing rime fog',
-    51: 'Light drizzle',
-    53: 'Moderate drizzle',
-    55: 'Dense drizzle',
-    56: 'Light freezing drizzle',
-    57: 'Dense freezing drizzle',
-    61: 'Slight rain',
-    63: 'Moderate rain',
-    65: 'Heavy rain',
-    66: 'Light freezing rain',
-    67: 'Heavy freezing rain',
-    71: 'Slight snow fall',
-    73: 'Moderate snow fall',
-    75: 'Heavy snow fall',
-    77: 'Snow grains',
-    80: 'Slight rain showers',
-    81: 'Moderate rain showers',
-    82: 'Violent rain showers',
-    85: 'Slight snow showers',
-    86: 'Heavy snow showers',
-    95: 'Thunderstorm',
-    96: 'Thunderstorm with slight hail',
-    99: 'Thunderstorm with heavy hail',
-};
-
-// Axios instance with defaults
-const http = axios.create({
-    timeout: 10000,
-    headers: {
-        // generic UA; avoid including personal emails or secrets
-        'User-Agent': process.env.HTTP_USER_AGENT || 'SaudiWeather/1.0',
-        'Accept': 'application/json, text/plain, */*'
-    },
-});
-
-/**
- * Health check endpoint
- */
-exports.getHealth = (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        uptime: Math.round(process.uptime()),
-        environment: config.server.env,
-    });
-};
 
 /**
  * Validate latitude and longitude
@@ -123,21 +27,27 @@ const validateCoordinates = (lat, lon) => {
     return { valid: true, latitude, longitude };
 };
 
-/**
- * Safely retrieve a value from an hourly array at index `idx`.
- * Returns `null` when the array is missing or the index is out of range.
- * Options:
- *  - round: '1d' => one decimal, 'int' => integer, null => no rounding
- *  - defaultValue: value to return when missing (default: null)
- */
-const getHourlyValue = (arr, idx, options = {}) => {
-    const { round = null, defaultValue = null } = options || {};
-    if (!arr || typeof idx !== 'number' || idx < 0 || typeof arr[idx] === 'undefined' || arr[idx] === null) return defaultValue;
-    const v = arr[idx];
-    if (round === '1d') return Math.round(v * 10) / 10;
-    if (round === 'int') return Math.round(v);
-    return v;
+// Haversine distance used for finding nearest city name for display title
+const toRad = (deg) => (deg * Math.PI) / 180;
+const haversineKm = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth radius km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+        + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2))
+        * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
 };
+
+// Helper to find city name from coordinates (uses searchService's internal list if accessible or duplicates logic?)
+// SearchService has the list but it is private.
+// For now, we simple rely on the coordinates or passed name.
+// NOTE: Ideally we expose "findNearest" from searchService.
+// Let's assume for this refactor we might lose strictly "nearest city name" resolution 
+// unless we add it to searchService. 
+// I will just use coordinates as name fallback or client provided name. 
+// Function findNearestCityName removed to rely on client or basic coord display.
 
 /**
  * Get weather data for coordinates
@@ -147,91 +57,43 @@ exports.getWeather = async (req, res) => {
         const { lat, lon } = req.query;
 
         if (!lat || !lon) {
-            return res.status(400).json({ error: 'Latitude and longitude are required' });
+            return res.status(400).json({ error: 'missing_coordinates' });
         }
 
         const coords = validateCoordinates(lat, lon);
         if (!coords.valid) {
-            return res.status(400).json({ error: coords.error });
+            return res.status(400).json({ error: 'invalid_coordinates', message: coords.error });
         }
 
-        // Lock to Saudi Arabia bounds
-        if (coords.latitude < 16 || coords.latitude > 32 || coords.longitude < 34 || coords.longitude > 56) {
-            return res.status(400).json({ error: 'Weather data is only available for locations within Saudi Arabia' });
-        }
-
-        // Normalize lat/lon rounding to 4 decimal places to reduce cache fragmentation
+        // Normalize lat/lon rounding to 4 decimal places (for display only)
         const latNorm = Math.round(coords.latitude * 10000) / 10000;
         const lonNorm = Math.round(coords.longitude * 10000) / 10000;
-        // caching key
+
         const cacheKey = `weather:${latNorm}:${lonNorm}`;
-        const cached = await getCached(cacheKey);
-        if (cached) return res.json(cached);
-
-        // Use Open-Meteo standard params: request hourly fields and current_weather
-        const url = `${config.apis.openMeteo}/forecast`;
-        const params = {
-            latitude: coords.latitude,
-            longitude: coords.longitude,
-            hourly: 'temperature_2m,weathercode',
-            daily: 'weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset',
-            timezone: 'auto',
-            forecast_days: 7,
-            current_weather: true,
-        };
-
-        const response = await http.get(url, { params });
-        const data = response.data;
-        const current = data.current_weather || {};
-        const hourly = data.hourly || {};
-        const daily = data.daily || {};
-
-        // determine nearest hourly index for current time
-        let idx = -1;
-        if (current.time && Array.isArray(hourly.time)) {
-            idx = hourly.time.indexOf(current.time);
-            if (idx === -1) {
-                // fallback: find closest timestamp
-                const currentTs = new Date(current.time).getTime();
-                let best = Infinity;
-                hourly.time.forEach((t, i) => {
-                    const d = Math.abs(new Date(t).getTime() - currentTs);
-                    if (d < best) { best = d; idx = i; }
-                });
-            }
+        const cachedData = cacheService.get(cacheKey);
+        if (cachedData) {
+            if (config.debug) console.log('[Cache] Hit', cacheKey);
+            return res.json(cachedData);
         }
 
-        const weatherDescription = WEATHER_CODES[current.weathercode] || (Array.isArray(daily.weathercode) ? WEATHER_CODES[daily.weathercode[0]] || 'Unknown' : 'Unknown');
+        const weatherData = await weatherService.fetchStart(coords.latitude, coords.longitude);
 
-        const mappedData = {
-            name: 'Current Location',
-            dt: current.time || (hourly.time && hourly.time[0]) || null,
-            is_day: typeof current.is_day !== 'undefined' ? current.is_day : null,
-            timezone: data.timezone,
-            main: {
-                temp: (typeof current.temperature !== 'undefined') ? Math.round(current.temperature * 10) / 10 : getHourlyValue(hourly.temperature_2m, idx, { round: '1d' }),
-            },
-            weather: [{
-                description: weatherDescription,
-                code: current.weathercode || (hourly.weathercode && hourly.weathercode[idx]) || null,
-            }],
-            hourly: {
-                time: hourly.time ? hourly.time.slice(0, 24) : [],
-                temperature_2m: hourly.temperature_2m ? hourly.temperature_2m.slice(0, 24) : [],
-                weather_code: hourly.weathercode ? hourly.weathercode.slice(0, 24) : [],
-            },
-            daily: {
-                time: daily.time || [],
-                weather_code: daily.weathercode || [],
-                temperature_2m_max: daily.temperature_2m_max || [],
-                temperature_2m_min: daily.temperature_2m_min || [],
-                sunrise: daily.sunrise || [],
-                sunset: daily.sunset || [],
-            },
-        };
+        // Enrich with name: Try finding nearest city, otherwise fallback to coords
+        const nearest = searchService.findNearest(coords.latitude, coords.longitude);
+        const displayName = nearest ? nearest.name : `${latNorm},${lonNorm}`;
 
-        await setCached(cacheKey, mappedData, config.cache.weather);
-        res.json(mappedData);
+        weatherData.name = displayName;
+        if (nearest && nearest.arabic) {
+            // Pass arabic name in a way client understands if needed, or we rely on client mapping
+            // but effectively we just want a good display name.
+            // If we really want to support arabic/english switching for this ID, 
+            // we might need to send both names.
+            weatherData.name_ar = nearest.arabic;
+        }
+
+        cacheService.set(cacheKey, weatherData);
+
+        res.json(weatherData);
 
     } catch (error) {
         if (config.debug) console.error('[Weather Error]', error.message);
@@ -242,9 +104,11 @@ exports.getWeather = async (req, res) => {
                 details: error.response.data,
             });
         }
-
         if (error.code === 'ECONNABORTED') {
             return res.status(504).json({ error: 'Weather service timeout' });
+        }
+        if (error.message === 'coords_out_of_bounds') {
+            return res.status(400).json({ error: 'coords_out_of_bounds' });
         }
 
         res.status(500).json({ error: 'Failed to fetch weather data' });
@@ -254,66 +118,33 @@ exports.getWeather = async (req, res) => {
 /**
  * Search for locations by name
  */
-// Preload the Saudi cities dataset once on module init for performance (async load)
-const fs = require('fs');
-const path = require('path');
-let SAUDI_CITIES = [];
-(async () => {
-    try {
-        const citiesPath = path.join(process.cwd(), 'public', 'assets', 'saudi_cities.json');
-        const citiesData = await fs.promises.readFile(citiesPath, 'utf8');
-        SAUDI_CITIES = JSON.parse(citiesData);
-        if (config.debug) console.log('[Cities] Loaded', SAUDI_CITIES.length, 'cities');
-    } catch (e) {
-        if (config.debug) console.warn('[Cities] Could not load cities list', e.message || e);
-        SAUDI_CITIES = [];
-    }
-})();
-
-// Normalize string (strip diacritics, lowercase)
-const normalize = (s) => {
-    if (!s) return '';
-    try {
-        return s.normalize ? s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase() : s.toLowerCase();
-    } catch (e) {
-        return String(s).toLowerCase();
-    }
-};
-
 exports.searchLocation = async (req, res) => {
     try {
         const { q } = req.query;
-
-        if (!q || q.trim().length < 2) {
-            return res.status(400).json({ error: 'Search query must be at least 2 characters' });
-        }
-        // Limit query length to prevent abuse
-        if (q.trim().length > 64) return res.status(400).json({ error: 'Search query too long' });
-
-        // Filter cities using preloaded normalized list
-        const query = q.trim();
-        const normalizedQuery = normalize(query);
-        const filtered = SAUDI_CITIES.filter(city => {
-            const en = normalize(city.name_en);
-            const ar = normalize(city.name_ar);
-            return en.includes(normalizedQuery) || ar.includes(normalizedQuery);
-        }).slice(0, 10);
-
-        // Map to expected format
-        const locations = filtered.map(city => ({
-            name: city.name_en,
-            lat: city.center[0],
-            lon: city.center[1],
-            country: 'Saudi Arabia',
-            region: '',
-            arabic: city.name_ar
-        }));
-
+        const locations = searchService.search(q);
         res.json(locations);
-
     } catch (error) {
         if (config.debug) console.error('[Search Error]', error.message);
+        if (error.message.includes('must be at least')) return res.status(400).json({ error: error.message });
         res.status(500).json({ error: 'Failed to search locations' });
+    }
+};
+
+/**
+ * Analytics Reception
+ * Logs basic event data for debugging/analysis
+ */
+exports.receiveAnalytics = (req, res) => {
+    try {
+        const payload = req.body;
+        if (config.debug || process.env.NODE_ENV !== 'production') {
+            console.log('[Analytics]', payload);
+        }
+        // Always return success to client
+        res.status(200).json({ status: 'received' });
+    } catch (e) {
+        // Ignore analytics errors
+        res.status(200).json({ status: 'ignored' });
     }
 };
 
@@ -333,18 +164,8 @@ exports.getReverseGeocode = async (req, res) => {
             return res.status(400).json({ error: coords.error });
         }
 
-        const url = `${config.apis.nominatim}/reverse`;
-        const params = {
-            format: 'json',
-            lat: coords.latitude,
-            lon: coords.longitude,
-            zoom: 10,
-            addressdetails: 1,
-        };
-
-        const response = await http.get(url, { params });
-        const data = response.data;
-        const address = data.address || {};
+        const geocodeData = await weatherService.reverseGeocode(coords.latitude, coords.longitude);
+        const address = geocodeData.address || {};
 
         const city = address.city
             || address.town
@@ -361,7 +182,7 @@ exports.getReverseGeocode = async (req, res) => {
             name: city,
             country,
             countryCode,
-            displayName: data.display_name || city,
+            displayName: geocodeData.display_name || city,
         });
 
     } catch (error) {
@@ -370,13 +191,12 @@ exports.getReverseGeocode = async (req, res) => {
         res.json({ name: 'Unknown Location', country: '', countryCode: '' });
     }
 };
-// Calendar API: returns months mapping and current month entry
+
+/**
+ * Calendar API: returns months mapping and current month entry
+ */
 exports.getCalendar = async (req, res) => {
     try {
-        const cacheKey = 'calendar:v1';
-        const cached = await getCached(cacheKey);
-        if (cached) return res.json(cached);
-
         const filePath = path.join(process.cwd(), 'public', 'assets', 'calendar.json');
         const contents = await fs.promises.readFile(filePath, 'utf8');
         const data = JSON.parse(contents || '{}');
@@ -399,11 +219,10 @@ exports.getCalendar = async (req, res) => {
 
         const result = {
             months,
-            currentMonth: monthParam,
-            currentEntry,
+            serverCurrentMonth: monthParam,
+            currentEntry, // Backwards compatibility if needed, but client should prefer local lookup
         };
 
-        await setCached(cacheKey, result, config.cache.geocode || 86400);
         return res.json(result);
     } catch (error) {
         if (config.debug) console.error('[Calendar API Error]', error.message);

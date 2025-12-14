@@ -133,9 +133,22 @@ app.use('/api', apiLimiter, apiRoutes);
 // Serve static files from public directory (project root `/public`)
 const publicPath = path.join(__dirname, '..', '..', 'public');
 app.use(express.static(publicPath, {
-    maxAge: isProduction ? '1d' : 0,
-    etag: true,
+    maxAge: 0,
+    etag: false,
+    setHeaders: (res, filePath) => {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    }
 }));
+
+// Set no-cache headers for all API responses
+app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
 
 // SPA fallback - serve index.html for all non-API routes
 // Serve index.html for navigational requests (SPA fallback). Ignore requests for other resource types.
@@ -143,6 +156,14 @@ app.get('*', (req, res, next) => {
     const accept = req.headers.accept || '';
     if (!accept.includes('text/html')) return next();
     const indexPath = path.join(publicPath, 'index.html');
+    // If the request does not provide lat/lon, include a header indicating server default location
+    const hasLat = typeof req.query.lat !== 'undefined' && req.query.lat !== '';
+    const hasLon = typeof req.query.lon !== 'undefined' && req.query.lon !== '';
+    if (!hasLat || !hasLon) {
+        try {
+            res.setHeader('X-Location-Fallback', 'default');
+        } catch (e) { /* ignore header set failures */ }
+    }
     res.sendFile(indexPath, (err) => {
         if (err) {
             errlog(`[Static Serve Error] Failed to send ${indexPath}: ${err.message}`);
@@ -180,8 +201,8 @@ process.on('unhandledRejection', (reason) => {
     errlog('[Unhandled Rejection] ', reason && reason.stack ? reason.stack : reason);
 });
 
-app.listen(PORT, () => {
-    log(`🌦️  Saudi Weather Server running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    log(`🌦️  Saudi Weather Server running at http://0.0.0.0:${PORT}`);
     log(`   Environment: ${config.server.env}`);
     log(`   Static files: ${publicPath}`);
 });

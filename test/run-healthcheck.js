@@ -49,7 +49,7 @@ const to = ms => new Promise(resolve => setTimeout(resolve, ms));
 
                 // Weather test
                 await new Promise((resolve, reject) => {
-                    const weatherOpts = { hostname: HOST, port: PORT, path: '/api/weather?lat=24.7136&lon=46.6753', method: 'GET' };
+                    const weatherOpts = { hostname: HOST, port: PORT, path: '/api/weather?lat=24.69999996&lon=46.73333003', method: 'GET' };
                     const wreq = http.request(weatherOpts, wres => {
                         let b = '';
                         wres.on('data', c => b += c);
@@ -88,6 +88,26 @@ const to = ms => new Promise(resolve => setTimeout(resolve, ms));
                     });
                     creq.on('error', reject);
                     creq.end();
+                });
+
+                // Privacy policy API test
+                await new Promise((resolve, reject) => {
+                    const privOpts = { hostname: HOST, port: PORT, path: '/api/privacypolicy', method: 'GET' };
+                    const preq = http.request(privOpts, pres => {
+                        let b = '';
+                        pres.on('data', c => b += c);
+                        pres.on('end', () => {
+                            try {
+                                assert.strictEqual(pres.statusCode, 200, `Privacy status ${pres.statusCode}`);
+                                const pdata = JSON.parse(b);
+                                assert.ok(pdata && (pdata.en || pdata.ar), 'Missing privacy content (en|ar)');
+                                console.log('Privacy endpoint passed');
+                                resolve();
+                            } catch (err) { reject(err); }
+                        });
+                    });
+                    preq.on('error', reject);
+                    preq.end();
                 });
 
                 console.log('All checks passed');

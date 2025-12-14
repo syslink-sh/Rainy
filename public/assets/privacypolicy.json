@@ -1,0 +1,100 @@
+{
+  "en": {
+    "title": "Terms of Use - Saudi Weather",
+    "sections": [
+      { 
+        "heading": "Introduction", 
+        "content": "These Terms of Use constitute a legally binding agreement between the user and the owner of the Saudi Weather application and website (hereinafter referred to as the 'Platform'). Accessing or using the Platform signifies explicit and unconditional acceptance of these Terms and any modifications thereto." 
+      },
+      { 
+        "heading": "Acceptance of Terms", 
+        "content": "By using the Platform or creating an account, the user fully agrees to these Terms and all related policies, including the Privacy Policy, which is an integral part of this agreement. The Platform reserves the right to modify these Terms at any time without prior notice. Continued use of the services constitutes acceptance of such modifications." 
+      },
+      { 
+        "heading": "Services Provided", 
+        "content": "The Platform provides information services related to weather and climate within the Kingdom of Saudi Arabia, including weather forecasts, alerts, interactive maps, climate data, daily bulletins, and any other services added later. All services are provided 'as is' without any warranties regarding accuracy, timeliness, or suitability for the user's needs." 
+      },
+      { 
+        "heading": "Limitations of Liability", 
+        "content": "- The Platform does not guarantee the accuracy, completeness, or continuity of displayed weather or climate data, which may differ due to changing weather conditions or data sources.\n- The Platform disclaims any liability for direct, indirect, or consequential damages arising from reliance on the information or due to service interruption or malfunction.\n- The Platform is not responsible for technical failures, force majeure events, or factors beyond its control." 
+      },
+      { 
+        "heading": "Permitted Use of the Platform", 
+        "content": "- Users must use the Platform for lawful purposes only.\n- Any attempt to access the Platform's systems without authorization, disrupt its operation, or copy/reuse its content for commercial purposes is strictly prohibited.\n- Users must not upload, share, or distribute any harmful, illegal, or inappropriate content." 
+      },
+      { 
+        "heading": "User Accounts", 
+        "content": "- Some services may require creating an account. Users are responsible for maintaining the confidentiality of their account credentials.\n- Users are liable for all activity occurring under their account.\n- The Platform reserves the right to suspend or terminate any account that violates these Terms or poses security or technical risks." 
+      },
+      { 
+        "heading": "Intellectual Property Rights", 
+        "content": "All content, data, designs, trademarks, interface layouts, texts, and software on the Platform are owned by Saudi Weather or its licensors. No material from the Platform may be copied, reproduced, modified, or used without prior written permission from the Platform." 
+      },
+      { 
+        "heading": "External Links", 
+        "content": "The Platform may contain links to external websites or services. The Platform is not responsible for the content, practices, or availability of these third-party sites, and links do not constitute endorsement or approval of such sites." 
+      },
+      { 
+        "heading": "Privacy", 
+        "content": "User data is collected, stored, and processed according to the Privacy Policy published on the Platform, which is an integral part of these Terms. By using the Platform, users consent to the collection and use of their data as described in the Privacy Policy." 
+      },
+      { 
+        "heading": "Governing Law and Jurisdiction", 
+        "content": "These Terms shall be governed by and interpreted in accordance with the laws of the Kingdom of Saudi Arabia. Users agree that the competent courts within the Kingdom shall have exclusive jurisdiction over any disputes arising from or related to these Terms." 
+      },
+      { 
+        "heading": "Contact and Support", 
+        "content": "The Platform provides official channels for users to submit inquiries, report issues, or request support. Users must use these official communication channels as the only method to contact the Platform for official matters." 
+      }
+    ]
+  },
+  "ar": {
+    "title": "شروط الاستخدام - طقس السعودية",
+    "sections": [
+      { 
+        "heading": "المقدمة", 
+        "content": "تُعد هذه الشروط اتفاقية قانونية ملزمة بين المستخدم وبين الجهة المالكة لتطبيق وموقع طقس السعودية (ويُشار إليهما لاحقًا بـ'المنصّة'). ويُعد دخول المستخدم إلى المنصّة أو استخدامه لأي من خدماتها قبولًا صريحًا وغير مشروط بهذه الشروط وبما قد يطرأ عليها من تعديلات." 
+      },
+      { 
+        "heading": "قبول الشروط", 
+        "content": "باستخدام المنصّة أو إنشاء حساب عليها، يقرّ المستخدم بموافقته الكاملة على هذه الشروط، وعلى جميع السياسات المكملة، بما في ذلك سياسة الخصوصية، والتي تُعد جزءًا لا يتجزأ من هذه الاتفاقية. ويجوز للمنصّة تعديل هذه الشروط في أي وقت دون إشعار مسبق، ويُعد استمرار المستخدم في الاستفادة من الخدمات قبولًا بالتعديلات." 
+      },
+      { 
+        "heading": "الخدمات المقدمة", 
+        "content": "توفر المنصّة خدمات معلوماتية تتعلق بالطقس والمناخ داخل المملكة العربية السعودية، بما في ذلك التوقعات الجوية، التنبيهات، الخرائط التفاعلية، البيانات المناخية، النشرات اليومية، وأي خدمات أخرى تضيفها المنصّة لاحقًا. تُقدّم الخدمات 'كما هي' دون أي ضمانات تتعلق بالدقة أو التوقيت أو التوافق مع احتياجات المستخدم." 
+      },
+      { 
+        "heading": "حدود المسؤولية", 
+        "content": "- لا تضمن المنصّة دقة أو اكتمال أو ثبات البيانات المناخية أو التوقعات الجوية المعروضة، وقد تختلف المعلومات عن الواقع نتيجة تغيّر الأحوال الجوية أو مصادر البيانات.\n- تُخلي المنصّة مسؤوليتها عن أي أضرار مباشرة أو غير مباشرة أو تبعية تنشأ عن الاعتماد على المعلومات أو نتيجة انقطاع أو خلل في الخدمة.\n- لا تتحمل المنصّة أي مسؤولية عن الأعطال التقنية أو حالات القوة القاهرة أو أي عوامل خارجة عن السيطرة." 
+      },
+      { 
+        "heading": "الاستخدام المشروع", 
+        "content": "- يجب استخدام المنصّة للأغراض المشروعة فقط.\n- يُحظر أي محاولة للوصول غير المصرح به إلى أنظمة المنصّة، أو تعطيل تشغيلها، أو نسخ محتواها أو إعادة استخدامه لأغراض تجارية دون إذن خطّي.\n- يلتزم المستخدم بعدم نشر أو مشاركة أي محتوى ضار أو غير قانوني أو غير مناسب." 
+      },
+      { 
+        "heading": "الحسابات", 
+        "content": "- قد تتطلب بعض الخدمات إنشاء حساب. يتحمّل المستخدم مسؤولية الحفاظ على سرية بيانات حسابه.\n- يتحمّل المستخدم كامل المسؤولية عن أي نشاط يتم من خلال حسابه.\n- تحتفظ المنصّة بحق تعليق أو إيقاف أي حساب يخرق هذه الشروط أو يشكل خطرًا أمنيًا أو تقنيًا." 
+      },
+      { 
+        "heading": "الملكية الفكرية", 
+        "content": "جميع الحقوق المتعلقة بالمحتوى، والبيانات، والتصاميم، والعلامات التجارية، وواجهات الاستخدام، والنصوص، والبرمجيات مملوكة لتطبيق وموقع طقس السعودية أو للجهات المرخصة له، ويُحظر نسخها أو استخدامها دون إذن خطّي مسبق." 
+      },
+      { 
+        "heading": "الروابط الخارجية", 
+        "content": "قد تحتوي المنصّة على روابط لمواقع أو خدمات خارجية، ولا تتحمل المنصّة أي مسؤولية عن محتوى أو ممارسات تلك المواقع، ولا تُعد هذه الروابط تأييدًا أو اعتمادًا لها." 
+      },
+      { 
+        "heading": "الخصوصية", 
+        "content": "تُدار بيانات المستخدم وفق سياسة الخصوصية المعتمدة لدى المنصّة، والتي تُعد جزءًا لا يتجزأ من هذه الشروط. باستخدام المنصّة، يوافق المستخدم على جمع واستخدام بياناته وفقًا للسياسة." 
+      },
+      { 
+        "heading": "القانون والاختصاص القضائي", 
+        "content": "تخضع هذه الشروط لأنظمة المملكة العربية السعودية، ويوافق المستخدم على أن تكون المحاكم المختصة داخل المملكة لها الاختصاص الحصري للنظر في أي نزاعات تنشأ عن هذه الشروط أو المتعلقة بها." 
+      },
+      { 
+        "heading": "الاتصال والدعم", 
+        "content": "توفر المنصّة قنوات رسمية للتواصل مع المستخدمين لتقديم الاستفسارات أو رفع البلاغات أو طلب الدعم. يجب استخدام هذه القنوات الرسمية فقط للاتصال بالمنصّة في الأمور الرسمية." 
+      }
+    ]
+  }
+}

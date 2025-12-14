@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 
 <p align="center">
-  <a href="https://saudiweather.syslink.dev"><strong>Saudi Weather</strong></a>
+  <a href="https://saudi-weather.syslink.dev"><strong>Saudi Weather</strong></a>
   <br/>
   <small>The best weather app in Saudi Arabia, with updated forecasts and accurate weather.</small>
 </p>
@@ -12,7 +12,7 @@
 Saudi Weather is the best weather app in Saudi Arabia, with updated forecasts and accurate weather.
 
 - Author: SySLink
-- Homepage: https://saudiweather.syslink.dev
+- Homepage: https://saudi-weather.syslink.dev
 - Repository: https://github.com/syslink-sh/saudi-weather
 
 ## Highlights

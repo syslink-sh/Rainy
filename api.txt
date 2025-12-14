@@ -1,13 +1,13 @@
 Saudi Weather — API Documentation
 
 Base URL
-- All API routes are mounted under the `/api` path. Example base: `http://<host>:<port>/api`
+- All API routes are mounted under the `/api` path. Example base: `https://saudi-weather.syslink.dev/api`
 
 General Notes
 - No authentication required.
 - Rate limiting: Default is 100 requests per 15 minutes (see `config.rateLimit`).
 - CORS: Requests are allowed from configured origins (see `server/config.js` `cors.allowedOrigins`).
-- Cache: Weather responses use server caching (Redis if available, otherwise in-memory). Cache TTLs from `server/config.js`:
+- Cache: Weather responses use in-memory server caching. Cache TTLs from `server/config.js`:
   - weather: 300 seconds (5 minutes)
   - search: 3600 seconds (1 hour) — (NOTE: search uses a local preloaded dataset, not an active cache in controller)
   - geocode: 86400 seconds (24 hours)
@@ -75,7 +75,7 @@ API Endpoints
     - 5xx When upstream API fails: returns the upstream error if available or { "error": "Failed to fetch weather data" }
 
   - Examples (GET):
-    - Riyadh: `/api/weather?lat=24.7136&lon=46.6753`
+    - Riyadh: `/api/weather?lat=24.69999996&lon=46.73333003`
     - Jeddah: `/api/weather?lat=21.5433&lon=39.1728`
 
 - GET /search
@@ -128,6 +128,27 @@ API Endpoints
     - 400 Bad Request: missing or invalid coordinates (similar to `/weather`)
     - NOTE: On upstream Nominatim errors the controller returns a 200 fallback with "Unknown Location" instead of a 5xx.
 
+- GET /calendar
+  - Purpose: Return calendar data (Hijri/Gregorian seasons and agricultural notes)
+  - Method: GET
+  - Path: `/api/calendar`
+  - Query Parameters (optional):
+    - `month`: 2-digit month string (e.g., "01" for January). Defaults to current server month.
+  - Response: 200 OK, JSON
+    - `months`: Object containing all months data
+    - `currentMonth`: String (e.g., "12")
+    - `currentEntry`: Object for the requested month
+      - Contains seasonal info (English/Arabic), stars, agricultural notes.
+  - Example: `/api/calendar?month=01`
+
+- GET /privacypolicy
+  - Purpose: Return privacy policy content
+  - Method: GET
+  - Path: `/api/privacypolicy`
+  - Response: 200 OK, JSON
+    - Object containing policy text (usually segmented by language, e.g., `en`, `ar`).
+
+
 - Unknown API endpoints
   - Any other `/api/*` endpoints return 404 with JSON:
     {
@@ -138,7 +159,7 @@ API Endpoints
 Developer Notes
 - Hosting: App serves static files from `/public` and all APIs under `/api`.
 - Rate limits: The server uses `express-rate-limit` to limit requests; adjust `config.rateLimit` to change behavior.
-- Caching: The weather data response is cached on the server to reduce load on upstream APIs. When Redis is available (set `REDIS_URL`), Redis will be used; otherwise a simple in-memory Map is used.
+- Caching: The weather data response is cached in-memory on the server to reduce load on upstream APIs.
 - Search dataset: The `search` endpoint uses `public/assets/saudi_cities.json`. If you need updated city data, modify or replace that JSON file and deploy. It is preloaded on server start.
 - External APIs used:
   - Open-Meteo (forecast) via `config.apis.openMeteo`.
@@ -147,16 +168,16 @@ Developer Notes
 
 Examples / Quick curl
 - Health:
-  curl -s "http://localhost:3005/api/health"
+  curl -s "https://saudi-weather.syslink.dev/api/health"
 
 - Weather:
-  curl -s "http://localhost:3005/api/weather?lat=24.7136&lon=46.6753"
+  curl -s "https://saudi-weather.syslink.dev/api/weather?lat=24.69999996&lon=46.73333003"
 
 - Search:
-  curl -s "http://localhost:3005/api/search?q=Riyadh"
+  curl -s "https://saudi-weather.syslink.dev/api/search?q=Riyadh"
 
 - Reverse geocode:
-  curl -s "http://localhost:3005/api/reverse-geocode?lat=24.7136&lon=46.6753"
+  curl -s "https://saudi-weather.syslink.dev/api/reverse-geocode?lat=24.69999996&lon=46.73333003"
 
 Contact / Attribution
 - The server uses Open-Meteo and Nominatim. Please review their terms when using the data.

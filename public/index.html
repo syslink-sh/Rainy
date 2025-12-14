@@ -1,248 +1,192 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover"
-    />
-    <meta
-      name="description"
-      content="Saudi Weather - A fast weather application providing real-time forecasts for Saudi Arabia."
-    />
-    <meta
-      name="keywords"
-      content="weather, forecast, rain, temperature, humidity, wind, radar, precipitation"
-    />
-    <meta name="author" content="SySLink" />
-    <meta name="theme-color" content="#4facfe" />
 
-    <!-- PWA Meta Tags -->
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="Saudi Weather" />
-    <meta name="application-name" content="Saudi Weather" />
-    <meta name="msapplication-TileColor" content="#4facfe" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <meta name="format-detection" content="telephone=no" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+  <meta name="description"
+    content="Saudi Weather - A fast weather application providing real-time forecasts for Saudi Arabia." />
+  <meta name="keywords" content="weather, forecast, rain, temperature, humidity, wind, radar, precipitation" />
+  <meta name="author" content="SySLink" />
+  <meta name="theme-color" content="#4facfe" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://saudiweather.syslink.dev/" />
-    <meta property="og:title" content="Saudi Weather" />
-    <meta
-      property="og:description"
-      content="Fast weather forecasts focused on Saudi Arabia."
-    />
-    <meta
-      property="og:image"
-      content="https://saudiweather.syslink.dev/og-image.png"
-    />
+  <!-- PWA Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Saudi Weather" />
+  <meta name="application-name" content="Saudi Weather" />
+  <meta name="msapplication-TileColor" content="#4facfe" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="format-detection" content="telephone=no" />
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://saudiweather.syslink.dev/" />
-    <meta name="twitter:title" content="Saudi Weather" />
-    <meta
-      name="twitter:description"
-      content="Fast weather forecasts focused on Saudi Arabia."
-    />
-    <meta
-      name="twitter:image"
-      content="https://saudiweather.syslink.dev/og-image.png"
-    />
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://saudi-weather.syslink.dev/" />
+  <meta property="og:title" content="Saudi Weather" />
+  <meta property="og:description" content="Fast weather forecasts focused on Saudi Arabia." />
+  <meta property="og:image" content="https://saudi-weather.syslink.dev/og-image.png" />
 
-    <title>Saudi Weather</title>
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://saudi-weather.syslink.dev/" />
+  <meta name="twitter:title" content="Saudi Weather" />
+  <meta name="twitter:description" content="Fast weather forecasts focused on Saudi Arabia." />
+  <meta name="twitter:image" content="https://saudi-weather.syslink.dev/og-image.png" />
 
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
+  <title>Saudi Weather</title>
 
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/icons/icon-192x192.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="167x167"
-      href="/icons/icon-152x152.png"
-    />
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
 
-    <!-- Splash Screens for iOS -->
-    <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png" />
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-152x152.png" />
 
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-    <link rel="stylesheet" href="css/style.css?v=2" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  </head>
-  <body>
-    <div id="global-loader" class="global-loader">
-      <div class="loader-content">
-        <div class="spinner-large"></div>
-        <h2>Loading Weather...</h2>
+  <!-- Splash Screens for iOS -->
+  <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png" />
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+  <link rel="stylesheet" href="css/style.css?v=2" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+</head>
+
+<body>
+  <div id="global-loader" class="global-loader" aria-hidden="false" role="status" aria-live="polite">
+    <div class="loader-content">
+      <div class="loader-sun"></div>
+      <div class="loader-cloud"></div>
+    </div>
+    <div class="loader-text">Loading Weather...</div>
+  </div>
+
+  <div id="weather-bg" class="weather-bg clear">
+    <div class="bg-layer layer-1"></div>
+    <div class="bg-layer layer-2"></div>
+    <div class="bg-layer layer-3"></div>
+  </div>
+
+  <div class="app-container">
+    <header>
+      <div class="header-left">
+        <a href="/" class="logo-link">
+          <span class="logo-icon" aria-hidden="true">🌦️</span>
+          <span class="logo-text">Saudi Weather</span>
+        </a>
+        <div class="search-container">
+          <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search for a city" autocomplete="off"
+              aria-label="Search for a city" />
+            <button id="search-btn" aria-label="Search">
+              <i class="fas fa-search" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div id="search-results" class="search-results"></div>
+        </div>
       </div>
-    </div>
+      <div class="location-display">
+        <h2 id="city-name" aria-live="polite">Loading city...</h2>
+        <p id="country-name" aria-live="polite"></p>
+        <p id="current-time" aria-live="polite">--:--</p>
+        <p id="date-display" aria-live="polite">--</p>
+      </div>
+    </header>
 
-    <div id="weather-bg" class="weather-bg clear">
-      <div class="bg-layer layer-1"></div>
-      <div class="bg-layer layer-2"></div>
-      <div class="bg-layer layer-3"></div>
-    </div>
-
-    <div class="app-container">
-      <header>
-        <div class="header-left">
-          <a href="/" class="logo-link">
-            <span class="logo-icon" aria-hidden="true">🌦️</span>
-            <span class="logo-text">Saudi Weather</span>
-          </a>
-          <div class="search-container">
-            <div class="search-bar">
-              <input
-                type="text"
-                id="search-input"
-                placeholder="Search for a city"
-                autocomplete="off"
-                aria-label="Search for a city"
-              />
-              <button id="search-btn" aria-label="Search">
-                <i class="fas fa-search" aria-hidden="true"></i>
-              </button>
-            </div>
-            <div id="search-results" class="search-results"></div>
-          </div>
+    <main>
+      <div class="weather-main">
+        <div class="icon-wrapper" id="weather-icon-container"></div>
+        <div class="temp-wrapper">
+          <h1 id="temp">--</h1>
+          <p id="description">--</p>
         </div>
-        <div class="location-display">
-          <h2 id="city-name" aria-live="polite">Loading city...</h2>
-          <p id="country-name" aria-live="polite"></p>
-          <p id="current-time" aria-live="polite">--:--</p>
-          <p id="date-display" aria-live="polite">--</p>
-        </div>
-      </header>
+      </div>
 
-      <main>
-        <div class="weather-main">
-          <div class="icon-wrapper" id="weather-icon-container"></div>
-          <div class="temp-wrapper">
-            <h1 id="temp">--</h1>
-            <p id="description">--</p>
+      <div class="weather-details">
+        <div class="calendar-item wide" id="cal-season-wide"></div>
+      </div>
+
+      <!-- Season Wheel Container -->
+      <div class="season-card">
+        <div id="season-wheel-container"></div>
+      </div>
+
+      <div class="forecast-container">
+        <div class="hourly-forecast">
+          <h3 id="hourly-forecast-title">توقع الساعة</h3>
+          <div class="hourly-scroll" id="hourly-forecast">
+            <!-- Hourly items injected here -->
           </div>
         </div>
 
-        <div class="weather-details">
-          <div
-            class="calendar-item wide"
-            id="cal-season-wide"
-            role="region"
-            aria-live="polite"
-          >
-            <div class="cal-season-content">
-              <h3 class="cal-season-name"></h3>
-              <p class="cal-season-sub"></p>
-            </div>
+        <div class="daily-forecast">
+          <h3 id="daily-forecast-title">7-Day Forecast</h3>
+          <div class="daily-list" id="daily-forecast">
+            <!-- Daily items injected here -->
           </div>
         </div>
+      </div>
+    </main>
 
-        <div class="forecast-container">
-          <div class="hourly-forecast">
-            <h3 id="hourly-forecast-title">Hourly Forecast</h3>
-            <div class="hourly-scroll" id="hourly-forecast">
-              <!-- Hourly items injected here -->
-            </div>
-          </div>
+    <!-- calendar moved into details grid -->
 
-          <div class="daily-forecast">
-            <h3 id="daily-forecast-title">7-Day Forecast</h3>
-            <div class="daily-list" id="daily-forecast">
-              <!-- Daily items injected here -->
-            </div>
-          </div>
-        </div>
-      </main>
+    <div class="error-toast" id="error-toast"></div>
 
-      <!-- calendar moved into details grid -->
+    <footer class="app-footer">
+      <p>
+        <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        —
+        <span class="lang-switch"><a href="/ar/" class="lang-link" data-lang="ar">AR</a> |
+          <a href="/" class="lang-link" data-lang="en">EN</a></span>
+      </p>
+    </footer>
+    <script src="js/i18n.js" defer></script>
+  </div>
+  <script src="js/config.js"></script>
+  <script type="module" src="js/app.js"></script>
 
-      <div class="error-toast" id="error-toast"></div>
+  <!-- Service Worker Registration -->
+  <script>
+    // Register Service Worker for PWA
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((registration) => {
+            if (window.appConfig?.debug)
+              console.log(
+                "🌦️ Service Worker registered:",
+                registration.scope,
+              );
 
-      <footer class="app-footer">
-        <p>
-          <a href="/privacy.html" target="_blank" rel="noopener noreferrer"
-            >Privacy Policy</a
-          >
-          —
-          <span class="lang-switch"
-            ><a href="/ar/" class="lang-link" data-lang="ar">AR</a> |
-            <a href="/" class="lang-link" data-lang="en">EN</a></span
-          >
-        </p>
-      </footer>
-      <script src="js/i18n.js" defer></script>
-    </div>
-    <script src="js/config.js"></script>
-    <script src="js/main.js?v=11"></script>
-
-    <!-- Service Worker Registration -->
-    <script>
-      // Register Service Worker for PWA
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("/sw.js")
-            .then((registration) => {
-              if (window.appConfig?.debug)
-                console.log(
-                  "🌦️ Service Worker registered:",
-                  registration.scope,
-                );
-
-              // Check for updates
-              registration.addEventListener("updatefound", () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener("statechange", () => {
-                  if (
-                    newWorker.state === "installed" &&
-                    navigator.serviceWorker.controller
-                  ) {
-                    // New content available, show update notification
-                    if (window.appConfig?.debug)
-                      console.log(
-                        "🌦️ New version available! Refresh to update.",
-                      );
-                  }
-                });
+            // Check for updates
+            registration.addEventListener("updatefound", () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener("statechange", () => {
+                if (
+                  newWorker.state === "installed" &&
+                  navigator.serviceWorker.controller
+                ) {
+                  // New content available, show update notification
+                  if (window.appConfig?.debug)
+                    console.log(
+                      "🌦️ New version available! Refresh to update.",
+                    );
+                }
               });
-            })
-            .catch((error) => {
-              console.error("🌦️ Service Worker registration failed:", error);
             });
-        });
-      }
-
-      // Handle PWA install prompt
-      let deferredPrompt;
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // You can show a custom install button here if desired
-        if (window.appConfig?.debug) console.log("🌦️ PWA install prompt ready");
+          })
+          .catch((error) => {
+            console.error("🌦️ Service Worker registration failed:", error);
+          });
       });
+    }
+  </script>
+  <!-- Service Worker Registration removed -->
 
-      // Track successful installation
-      window.addEventListener("appinstalled", () => {
-        if (window.appConfig?.debug)
-          console.log("🌦️ Saudi Weather has been installed!");
-        deferredPrompt = null;
-      });
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>

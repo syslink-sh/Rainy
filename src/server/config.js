@@ -18,7 +18,7 @@ module.exports = {
                 'http://localhost:5150',
                 'http://127.0.0.1:3005',
                 'http://127.0.0.1:5150',
-                'https://saudiweather.syslink.dev'
+                'https://saudi-weather.syslink.dev'
             ],
     },
 
@@ -28,6 +28,20 @@ module.exports = {
         openMeteoGeocoding: 'https://geocoding-api.open-meteo.com/v1',
         rainViewer: 'https://api.rainviewer.com',
         nominatim: 'https://nominatim.openstreetmap.org',
+    },
+
+    // Default coordinates and bounds for Saudi Arabia
+    DEFAULT_COORDS: {
+        lat: 24.69999996,
+        lon: 46.73333003,
+        name: 'Riyadh'
+    },
+
+    SAUDI_BOUNDS: {
+        minLat: 16.0,
+        maxLat: 32.5,
+        minLon: 34.0,
+        maxLon: 56.5
     },
 
     // Rate Limiting

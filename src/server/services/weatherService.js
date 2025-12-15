@@ -7,30 +7,30 @@ const WEATHER_CODES = {
     1: 'Mainly clear',
     2: 'Partly cloudy',
     3: 'Overcast',
-    45: 'Fog',
-    48: 'Depositing rime fog',
-    51: 'Light drizzle',
-    53: 'Moderate drizzle',
-    55: 'Dense drizzle',
-    56: 'Light freezing drizzle',
-    57: 'Dense freezing drizzle',
-    61: 'Slight rain',
-    63: 'Moderate rain',
-    65: 'Heavy rain',
-    66: 'Light freezing rain',
-    67: 'Heavy freezing rain',
-    71: 'Slight snow fall',
-    73: 'Moderate snow fall',
-    75: 'Heavy snow fall',
-    77: 'Snow grains',
-    80: 'Slight rain showers',
-    81: 'Moderate rain showers',
-    82: 'Violent rain showers',
-    85: 'Slight snow showers',
-    86: 'Heavy snow showers',
-    95: 'Thunderstorm',
-    96: 'Thunderstorm with slight hail',
-    99: 'Thunderstorm with heavy hail',
+    10: 'Fog',
+    11: 'Depositing rime fog',
+    12: 'Light drizzle',
+    13: 'Moderate drizzle',
+    14: 'Dense drizzle',
+    15: 'Light freezing drizzle',
+    16: 'Dense freezing drizzle',
+    17: 'Slight rain',
+    18: 'Moderate rain',
+    19: 'Heavy rain',
+    20: 'Light freezing rain',
+    21: 'Heavy freezing rain',
+    22: 'Slight snow fall',
+    23: 'Moderate snow fall',
+    24: 'Heavy snow fall',
+    25: 'Snow grains',
+    26: 'Slight rain showers',
+    27: 'Moderate rain showers',
+    28: 'Violent rain showers',
+    29: 'Slight snow showers',
+    30: 'Heavy snow showers',
+    31: 'Thunderstorm',
+    32: 'Thunderstorm with slight hail',
+    33: 'Thunderstorm with heavy hail',
 };
 
 const http = axios.create({
@@ -62,17 +62,6 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 };
-
-// We need access to the cities list for nearest city lookup. 
-// Ideally searchService would export it or we fetch it.
-// For now, let's assume we can fetch it or just use simple coords if not available.
-// Simplification: Doing standard reverse geocoding via Nominatim if needed or just skipping nearest city logic here
-// if we want to strictly separate.
-// HOWEVER, original code used SAUDI_CITIES inline.
-// Let's copy the cities loading logic purely for nearest city lookup OR import from searchService?
-// Importing from searchService might be circular or messy if it has side effects.
-// Let's duplicate the cities load for robustness or move cities data to a shared data loader.
-// For this step, I'll keep it simple and focus on the external API fetch.
 
 exports.fetchStart = async (lat, lon) => {
     // Lock to Saudi Arabia bounds
@@ -156,5 +145,29 @@ exports.reverseGeocode = async (lat, lon) => {
         return response.data;
     } catch (e) {
         throw new Error('Geocode failed');
+    }
+};
+
+exports.getPrayerTimes = async (lat, lon) => {
+    // Current date in DD-MM-YYYY format
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const dateStr = `${day}-${month}-${year}`;
+
+    const url = `http://api.aladhan.com/v1/timings/${dateStr}`;
+    const params = {
+        latitude: lat,
+        longitude: lon,
+        method: 3, // Muslim World League
+        iso8601: 'false' // Return HH:MM format
+    };
+
+    try {
+        const response = await http.get(url, { params });
+        return response.data;
+    } catch (e) {
+        throw new Error('Prayer times fetch failed');
     }
 };

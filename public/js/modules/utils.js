@@ -75,3 +75,71 @@ export const getWeatherIconClass = (code) => {
     if (code >= 95 && code <= 99) return 'fa-bolt';
     return 'fa-cloud';
 };
+
+export const getWeatherCodeDescription = (code, isArabic) => {
+    const descriptions = {
+        en: {
+            0: 'Clear',
+            1: 'Mainly Clear',
+            2: 'Partly Cloudy',
+            3: 'Overcast',
+            45: 'Fog',
+            48: 'Rime Fog',
+            51: 'Light Drizzle',
+            53: 'Drizzle',
+            55: 'Heavy Drizzle',
+            61: 'Light Rain',
+            63: 'Rain',
+            65: 'Heavy Rain',
+            71: 'Light Snow',
+            73: 'Snow',
+            75: 'Heavy Snow',
+            80: 'Light Showers',
+            81: 'Showers',
+            82: 'Heavy Showers',
+            95: 'Thunderstorm',
+            96: 'Thunderstorm',
+            99: 'Heavy Thunderstorm'
+        },
+        ar: {
+            0: 'صحو',
+            1: 'صحو في الغالب',
+            2: 'غيوم متفرقة',
+            3: 'غائم',
+            45: 'ضباب',
+            48: 'ضباب متجمد',
+            51: 'رذاذ خفيف',
+            53: 'رذاذ',
+            55: 'رذاذ كثيف',
+            61: 'مطر خفيف',
+            63: 'مطر',
+            65: 'مطر غزير',
+            71: 'ثلوج خفيفة',
+            73: 'ثلوج',
+            75: 'ثلوج كثيفة',
+            80: 'زخات خفيفة',
+            81: 'زخات',
+            82: 'زخات غزيرة',
+            95: 'عاصفة رعدية',
+            96: 'عاصفة رعدية',
+            99: 'عاصفة رعدية قوية'
+        }
+    };
+
+    const lang = isArabic ? 'ar' : 'en';
+    return descriptions[lang][code] || (isArabic ? 'غير معروف' : 'Unknown');
+};
+
+export const getWeatherEmoji = (code) => {
+    if (code === 0 || code === 1) return '☀️';
+    if (code === 2) return '⛅';
+    if (code === 3) return '☁️';
+    if (code >= 45 && code <= 48) return '🌫️';
+    if (code >= 51 && code <= 55) return '🌦️';
+    if (code >= 61 && code <= 67) return '🌧️';
+    if (code >= 71 && code <= 77) return '🌨️';
+    if (code >= 80 && code <= 82) return '🌧️';
+    if (code >= 85 && code <= 86) return '🌨️';
+    if (code >= 95 && code <= 99) return '⛈️';
+    return '☁️';
+};

@@ -1,4 +1,4 @@
-import { safeSetText, getWeatherIconClass, translateWeatherDescription } from './utils.js';
+import { safeSetText, getWeatherIconClass, translateWeatherDescription, getWeatherCodeDescription, getWeatherEmoji } from './utils.js';
 
 export const getIconSVG = (code, isDay) => {
     const isNight = isDay === 0;
@@ -58,7 +58,7 @@ export const getIconSVG = (code, isDay) => {
     return `<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">${defs}${content}</svg>`;
 };
 
-export const renderHourlyForecast = (hourly) => {
+export const renderHourlyForecast = (hourly, isArabic) => {
     const hourlyForecastEl = document.getElementById('hourly-forecast');
     if (!hourlyForecastEl) return;
     hourlyForecastEl.innerHTML = '';
@@ -71,16 +71,31 @@ export const renderHourlyForecast = (hourly) => {
         if (index < 24) {
             const div = document.createElement('div');
             div.className = 'hourly-item';
+
             const timeSpan = document.createElement('span');
             timeSpan.className = 'time';
             safeSetText(timeSpan, `${hour}:00`, 'timeSpan');
-            const iconI = document.createElement('i');
-            iconI.className = `fas ${getWeatherIconClass(hourly.weather_code[index])} icon`;
+
+            const weatherCode = hourly.weather_code[index];
+            const emojiSpan = document.createElement('span');
+            emojiSpan.className = 'weather-emoji';
+            emojiSpan.style.fontSize = '1.8rem';
+            safeSetText(emojiSpan, getWeatherEmoji(weatherCode), 'weatherEmoji');
+
+            const descSpan = document.createElement('span');
+            descSpan.className = 'weather-desc';
+            descSpan.style.fontSize = '0.75rem';
+            descSpan.style.color = 'var(--text-secondary)';
+            descSpan.style.textAlign = 'center';
+            safeSetText(descSpan, getWeatherCodeDescription(weatherCode, isArabic), 'weatherDesc');
+
             const tempSpan = document.createElement('span');
             tempSpan.className = 'temp';
-            safeSetText(tempSpan, Math.round(hourly.temperature_2m[index]), 'tempSpan');
+            safeSetText(tempSpan, Math.round(hourly.temperature_2m[index]) + '°', 'tempSpan');
+
             div.appendChild(timeSpan);
-            div.appendChild(iconI);
+            div.appendChild(emojiSpan);
+            div.appendChild(descSpan);
             div.appendChild(tempSpan);
             fragment.appendChild(div);
         }
@@ -92,31 +107,51 @@ export const renderDailyForecast = (daily, locale) => {
     const dailyForecastEl = document.getElementById('daily-forecast');
     if (!dailyForecastEl) return;
     dailyForecastEl.innerHTML = '';
+    const isArabic = locale.startsWith('ar');
     const fragment = document.createDocumentFragment();
     daily.time.forEach((timeStr, index) => {
         const date = new Date(timeStr);
         const dayName = date.toLocaleDateString(locale, { weekday: 'long' });
-        const todayLabel = locale.startsWith('ar') ? 'اليوم' : 'Today';
+        const todayLabel = isArabic ? 'اليوم' : 'Today';
         const div = document.createElement('div');
         div.className = 'daily-item';
+
         const daySpan = document.createElement('span');
         daySpan.className = 'day';
         safeSetText(daySpan, index === 0 ? todayLabel : dayName, 'daySpan');
+
+        const weatherCode = daily.weather_code[index];
         const iconWrap = document.createElement('div');
         iconWrap.className = 'icon';
-        const iconI = document.createElement('i');
-        iconI.className = `fas ${getWeatherIconClass(daily.weather_code[index])}`;
-        iconWrap.appendChild(iconI);
+        iconWrap.style.display = 'flex';
+        iconWrap.style.flexDirection = 'column';
+        iconWrap.style.alignItems = 'center';
+        iconWrap.style.gap = '0.3rem';
+
+        const emojiSpan = document.createElement('span');
+        emojiSpan.style.fontSize = '1.5rem';
+        safeSetText(emojiSpan, getWeatherEmoji(weatherCode), 'weatherEmoji');
+
+        const descSpan = document.createElement('span');
+        descSpan.style.fontSize = '0.75rem';
+        descSpan.style.color = 'var(--text-secondary)';
+        descSpan.style.textAlign = 'center';
+        safeSetText(descSpan, getWeatherCodeDescription(weatherCode, isArabic), 'weatherDesc');
+
+        iconWrap.appendChild(emojiSpan);
+        iconWrap.appendChild(descSpan);
+
         const temps = document.createElement('div');
         temps.className = 'temps';
         const max = document.createElement('span');
         max.className = 'max';
-        safeSetText(max, Math.round(daily.temperature_2m_max[index]), 'maxTemp');
+        safeSetText(max, Math.round(daily.temperature_2m_max[index]) + '°', 'maxTemp');
         const min = document.createElement('span');
         min.className = 'min';
-        safeSetText(min, Math.round(daily.temperature_2m_min[index]), 'minTemp');
+        safeSetText(min, Math.round(daily.temperature_2m_min[index]) + '°', 'minTemp');
         temps.appendChild(max);
         temps.appendChild(min);
+
         div.appendChild(daySpan);
         div.appendChild(iconWrap);
         div.appendChild(temps);
@@ -155,4 +190,61 @@ export const updateBackground = (description, timeStr) => {
         if (weatherBg) weatherBg.classList.add(timeClass);
         document.body.classList.add(timeClass);
     }
+};
+
+export const renderPrayerTimes = (timings, isArabic) => {
+    const prayerTimesEl = document.getElementById('prayer-times-forecast');
+    if (!prayerTimesEl) return;
+    prayerTimesEl.innerHTML = '';
+
+    // Order of display
+    const keys = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+    // Arabic translations
+    const namesAr = {
+        'Fajr': 'الفجر',
+        'Sunrise': 'الشروق',
+        'Dhuhr': 'الظهر',
+        'Asr': 'العصر',
+        'Maghrib': 'المغرب',
+        'Isha': 'العشاء'
+    };
+
+    // Icon mapping
+    const icons = {
+        'Fajr': 'fa-cloud-sun',
+        'Sunrise': 'fa-sun',
+        'Dhuhr': 'fa-regular fa-sun',
+        'Asr': 'fa-cloud-sun',
+        'Maghrib': 'fa-cloud-moon',
+        'Isha': 'fa-moon'
+    };
+
+    const fragment = document.createDocumentFragment();
+
+    keys.forEach(key => {
+        const time = timings[key];
+        if (!time) return;
+
+        const div = document.createElement('div');
+        div.className = 'hourly-item';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'time';
+        safeSetText(nameSpan, isArabic ? namesAr[key] : key, 'prayerName');
+
+        const iconI = document.createElement('i');
+        iconI.className = `fas ${icons[key]} icon`;
+
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'temp';
+        safeSetText(timeSpan, time, 'prayerTime');
+
+        div.appendChild(nameSpan);
+        div.appendChild(iconI);
+        div.appendChild(timeSpan);
+        fragment.appendChild(div);
+    });
+
+    prayerTimesEl.appendChild(fragment);
 };

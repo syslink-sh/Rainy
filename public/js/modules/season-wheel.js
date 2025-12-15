@@ -262,7 +262,7 @@ export const renderSeasonWheel = (containerId) => {
     }
 
     const svg = `
-        <svg viewBox="0 0 ${size} ${size}" width="500" height="auto" style="max-width: 600px; display: block; margin: 0 auto;">
+        <svg viewBox="0 0 ${size} ${size}" width="100%" height="auto" style="max-width: 100%; display: block; margin: 0 auto;">
             ${svgContent}
         </svg>
     `;

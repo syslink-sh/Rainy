@@ -23,6 +23,9 @@ router.get('/calendar', apiController.getCalendar);
 // Privacy policy endpoint
 router.get('/privacypolicy', privacyController.getPrivacyPolicy);
 
+// Prayer times endpoint
+router.get('/prayertimes', apiController.getPrayerTimes);
+
 // 404 handler for unknown API routes
 router.use((req, res) => {
     res.status(404).json({

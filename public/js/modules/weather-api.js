@@ -17,6 +17,13 @@ export const reverseGeocode = async (lat, lon) => {
     const response = await fetch(`${apiBase}/reverse-geocode?lat=${lat}&lon=${lon}`);
     if (!response.ok) throw new Error('Geocode failed');
     return await response.json();
+}
+
+export const fetchPrayerTimes = async (lat, lon) => {
+    const apiBase = window.appConfig?.apiBaseUrl || '/api';
+    const response = await fetch(`${apiBase}/prayertimes?lat=${lat}&lon=${lon}`);
+    if (!response.ok) throw new Error('Prayer times unavailable');
+    return await response.json();
 };
 
 export const sendAnalytics = (event, data = {}) => {

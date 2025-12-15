@@ -50,6 +50,31 @@ const haversineKm = (lat1, lon1, lat2, lon2) => {
 // Function findNearestCityName removed to rely on client or basic coord display.
 
 /**
+ * Get prayer times for coordinates
+ */
+exports.getPrayerTimes = async (req, res) => {
+    try {
+        const { lat, lon } = req.query;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: 'missing_coordinates' });
+        }
+
+        const coords = validateCoordinates(lat, lon);
+        if (!coords.valid) {
+            return res.status(400).json({ error: 'invalid_coordinates', message: coords.error });
+        }
+
+        const data = await weatherService.getPrayerTimes(coords.latitude, coords.longitude);
+        res.json(data);
+
+    } catch (error) {
+        if (config.debug) console.error('[Prayer Times Error]', error.message);
+        res.status(500).json({ error: 'Failed to fetch prayer times' });
+    }
+};
+
+/**
  * Get weather data for coordinates
  */
 exports.getWeather = async (req, res) => {

@@ -1,6 +1,6 @@
 import { safeSetText, showError, translateWeatherDescription } from './modules/utils.js';
-import { fetchWeatherData, searchLocations, sendAnalytics, reverseGeocode } from './modules/weather-api.js';
-import { renderHourlyForecast, renderDailyForecast, updateBackground, getIconSVG } from './modules/ui-renderer.js';
+import { fetchWeatherData, searchLocations, sendAnalytics, reverseGeocode, fetchPrayerTimes } from './modules/weather-api.js';
+import { renderHourlyForecast, renderDailyForecast, updateBackground, getIconSVG, renderPrayerTimes } from './modules/ui-renderer.js';
 import { getLastLocationFromStorage, saveLastLocation, parseLatLonFromUrl, updateUrlForLocation, geolocateWithTimeout, isValidCoords } from './modules/location-service.js';
 
 import { loadCalendar } from './modules/calendar.js';
@@ -96,8 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (iconContainer) iconContainer.innerHTML = getIconSVG(data.weather[0].code, data.is_day);
 
             updateDateTime(data.timezone);
-            if (data.hourly) renderHourlyForecast(data.hourly);
+            if (data.hourly) renderHourlyForecast(data.hourly, isArabic);
             if (data.daily) renderDailyForecast(data.daily, locale);
+
+            // Fetch and render prayer times (non-blocking)
+            fetchPrayerTimes(lat, lon).then(prayerData => {
+                if (prayerData && prayerData.data && prayerData.data.timings) {
+                    renderPrayerTimes(prayerData.data.timings, isArabic);
+                }
+            }).catch(err => console.warn('Prayer times fetch failed', err));
 
             if (searchResultsEl) searchResultsEl.style.display = 'none';
 

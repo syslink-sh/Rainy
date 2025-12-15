@@ -1,4 +1,4 @@
-const CACHE_NAME = 'saudi-weather-v1';
+const CACHE_NAME = 'saudi-weather-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -6,11 +6,19 @@ const ASSETS_TO_CACHE = [
   '/js/app.js',
   '/js/config.js',
   '/js/i18n.js',
+  '/js/modules/calendar.js',
+  '/js/modules/location-service.js',
+  '/js/modules/season-wheel.js',
+  '/js/modules/ui-renderer.js',
+  '/js/modules/utils.js',
+  '/js/modules/weather-api.js',
   '/favicon.ico',
   '/manifest.json',
   '/offline.html',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icons/icon-512x512.png',
+  '/assets/calendar.json',
+  '/assets/saudi_cities.json'
 ];
 
 self.addEventListener('install', (event) => {

@@ -143,3 +143,13 @@ export const getWeatherEmoji = (code) => {
     if (code >= 95 && code <= 99) return '⛈️';
     return '☁️';
 };
+
+export const formatTo12Hour = (hours, minutes, isArabic) => {
+    let h = parseInt(hours, 10);
+    const m = parseInt(minutes, 10);
+    const suffix = h >= 12 ? (isArabic ? 'م' : 'PM') : (isArabic ? 'ص' : 'AM');
+    h = h % 12;
+    h = h ? h : 12; // the hour '0' should be '12'
+    const mStr = m < 10 ? '0' + m : m;
+    return `${h}:${mStr} ${suffix}`;
+};

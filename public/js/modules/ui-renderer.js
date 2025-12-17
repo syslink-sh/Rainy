@@ -1,4 +1,4 @@
-import { safeSetText, getWeatherIconClass, translateWeatherDescription, getWeatherCodeDescription, getWeatherEmoji } from './utils.js';
+import { safeSetText, getWeatherIconClass, translateWeatherDescription, getWeatherCodeDescription, getWeatherEmoji, formatTo12Hour } from './utils.js';
 
 export const getIconSVG = (code, isDay) => {
     const isNight = isDay === 0;
@@ -74,7 +74,7 @@ export const renderHourlyForecast = (hourly, isArabic) => {
 
             const timeSpan = document.createElement('span');
             timeSpan.className = 'time';
-            safeSetText(timeSpan, `${hour}:00`, 'timeSpan');
+            safeSetText(timeSpan, formatTo12Hour(hour, 0, isArabic), 'timeSpan');
 
             const weatherCode = hourly.weather_code[index];
             const emojiSpan = document.createElement('span');
@@ -236,9 +236,12 @@ export const renderPrayerTimes = (timings, isArabic) => {
         const iconI = document.createElement('i');
         iconI.className = `fas ${icons[key]} icon`;
 
+        const [hStr, mStr] = time.split(':'); // "HH:MM"
+        const formattedTime = formatTo12Hour(hStr, mStr, isArabic);
+
         const timeSpan = document.createElement('span');
         timeSpan.className = 'temp';
-        safeSetText(timeSpan, time, 'prayerTime');
+        safeSetText(timeSpan, formattedTime, 'prayerTime');
 
         div.appendChild(nameSpan);
         div.appendChild(iconI);

@@ -128,6 +128,10 @@ const apiLimiter = rateLimit({
     message: { error: 'Too many requests' },
 });
 
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
 app.use('/api', apiLimiter, apiRoutes);
 
 // Serve static files from public directory (project root `/public`)
